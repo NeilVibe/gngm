@@ -60,9 +60,10 @@ if [ -d "$TARGET_DOCS" ]; then
 fi
 
 # Create target + copy files
-mkdir -p "$TARGET_DOCS/docs" "$TARGET_DOCS/scripts"
+mkdir -p "$TARGET_DOCS/docs" "$TARGET_DOCS/scripts" "$TARGET_DOCS/protocols"
 cp "$SOURCE_DIR/docs"/*.md "$TARGET_DOCS/docs/" 2>/dev/null
 cp "$SOURCE_DIR/scripts"/*.sh "$TARGET_DOCS/scripts/"
+cp "$SOURCE_DIR/protocols"/*.md "$TARGET_DOCS/protocols/" 2>/dev/null
 chmod +x "$TARGET_DOCS/scripts"/*.sh
 
 # Also drop a thin README at the top of docs/GNGM/ pointing to the detailed docs

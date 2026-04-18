@@ -181,8 +181,15 @@ memory.create_relations([{from, to, relationType}])
 - User says "skip GNGM" or "just do X"
 - Emergency hotfix (run post-fix only, skip pre-task)
 
+## Engineering protocols (layer on top of GNGM)
+
+- **[../protocols/NLF.md](../protocols/NLF.md)** — No Lie Fix. Self-invoke on drift toward comment-out / disable / catch-and-ignore. User trigger: `NLF`.
+- **[../protocols/SDP.md](../protocols/SDP.md)** — Standard Development Protocol (baseline for all code changes). 5 steps: Brainstorm → ECC Plan Review → Execute → TDD Certificate → ECC Code Review.
+- **[../protocols/TDD.md](../protocols/TDD.md)** — TDD baseline + First-Debug Protocol (6-step heavy variant for production bug fixes from logs).
+
 ## See also
 
 - [02-PROTOCOL.md](02-PROTOCOL.md) — full mechanics
-- [04-LESSONS.md](04-LESSONS.md) — 8 pitfalls
+- [04-LESSONS.md](04-LESSONS.md) — 9 pitfalls
 - [01-SETUP.md](01-SETUP.md) — prerequisites
+- [00-INSTALL-FROM-SCRATCH.md](00-INSTALL-FROM-SCRATCH.md) — full install guide

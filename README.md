@@ -92,6 +92,16 @@ Full setup: [docs/01-SETUP.md](docs/01-SETUP.md)
 | `GNGM health` / `GNGM status` | health | 10-second 4-tool green/red check |
 | `full GNGM` / `mega GNGM` | everything | Pre-task → work → post-fix → quick org pass |
 
+## Engineering protocols (complement to GNGM)
+
+GNGM is the knowledge stack. These are the engineering disciplines that use it:
+
+- **[protocols/NLF.md](protocols/NLF.md)** — **No Lie Fix.** Real root cause only, forbidden-bandage rule. Self-invoked when drifting toward `comment out / disable / catch-and-ignore`. Trigger: user says `NLF`.
+- **[protocols/SDP.md](protocols/SDP.md)** — **Standard Development Protocol.** Baseline for ALL code changes: Brainstorm → ECC Plan Review → Execute → TDD Certificate → ECC Code Review → Learn.
+- **[protocols/TDD.md](protocols/TDD.md)** — **TDD baseline + First-Debug Protocol (heavy).** RED → GREEN per change; for production bugs, the 6-step discipline (read logs → trace → grill → simulate → RED tests → plan with exact code).
+
+All three are universal across projects; no project-specific context required.
+
 ## Repository structure
 
 ```
@@ -101,13 +111,22 @@ gngm/
 ├── CHANGELOG.md           version history
 ├── install.sh             one-command installer for any project
 ├── docs/
-│   ├── 01-SETUP.md        prerequisites + installation
-│   ├── 02-PROTOCOL.md     full 4-mode protocol mechanics
-│   ├── 03-CHEATSHEET.md   one-page quick reference
-│   └── 04-LESSONS.md      9 pitfalls + resilience patterns
+│   ├── 00-INSTALL-FROM-SCRATCH.md  (8-phase install guide)
+│   ├── 01-SETUP.md                 prerequisites + installation
+│   ├── 02-PROTOCOL.md              full 4-mode protocol mechanics
+│   ├── 03-CHEATSHEET.md            one-page quick reference
+│   └── 04-LESSONS.md               9 pitfalls + resilience patterns
+├── protocols/
+│   ├── NLF.md                      No Lie Fix — real root cause only
+│   ├── SDP.md                      Standard Development Protocol
+│   └── TDD.md                      TDD baseline + First-Debug Protocol
+├── clients/graphiti/
+│   ├── qwen_client.py              vendored (Qwen 4-stage salvage pipeline)
+│   └── feed_project.py             project seeding helper
 └── scripts/
-    ├── gngm-health.sh     10-second 4-tool health check
-    └── gngm-init.sh       idempotent project bootstrap
+    ├── gngm-health.sh              10-second 4-tool health check
+    ├── gngm-init.sh                idempotent project bootstrap
+    └── install-services.sh         one-shot services installer
 ```
 
 ## Three design principles behind portability

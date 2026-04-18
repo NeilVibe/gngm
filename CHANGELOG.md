@@ -2,6 +2,22 @@
 
 All notable changes to GNGM (the portable knowledge stack protocol).
 
+## [0.3.0] — 2026-04-18 — Engineering protocols added
+
+Added universal engineering protocols that layer on top of the knowledge stack.
+
+### Added
+
+- `protocols/NLF.md` — No Lie Fix (real root cause only, forbidden-bandage rule, trigger phrase `NLF`)
+- `protocols/SDP.md` — Standard Development Protocol (5-step baseline: Brainstorm → ECC plan review → Execute → TDD certificate → ECC code review)
+- `protocols/TDD.md` — TDD baseline + First-Debug Protocol (6-step heavy variant for production bug fixes from logs)
+
+### Updated
+
+- `README.md` — new "Engineering protocols" section with links + summary
+- `install.sh` — now copies `protocols/` directory into target projects alongside `docs/` and `scripts/`
+- `docs/03-CHEATSHEET.md` — protocols section added
+
 ## [0.2.0] — 2026-04-18 — Standalone repo launch
 
 First public release of GNGM as a standalone installable repo. Protocol v2.
