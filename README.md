@@ -26,6 +26,18 @@ Without a knowledge stack, every AI coding session re-derives knowledge that alr
 
 Agents stop rediscovering and start remembering.
 
+## Full install from scratch
+
+New to the stack? See **[docs/00-INSTALL-FROM-SCRATCH.md](docs/00-INSTALL-FROM-SCRATCH.md)** — 8-phase comprehensive guide for Docker, Ollama, Qwen, FalkorDB, Viking, NeuralTree MCP, Memory MCP, Graphiti client, Graphify venv, and Claude Code wiring. Everything is open-source; total install ~30-60 min.
+
+Or run the one-shot services installer (review before running — makes system-wide changes):
+
+```bash
+git clone https://github.com/NeilVibe/gngm.git ~/gngm
+cd ~/gngm
+bash scripts/install-services.sh
+```
+
 ## Install in a new project (30 seconds)
 
 ```bash
