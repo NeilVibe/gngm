@@ -1,6 +1,6 @@
 # GNGM Lessons — Pitfalls + Resilience Patterns
 
-Eight production failure modes surfaced while building and operating GNGM in a related project (LocalizationTools). Read once, internalize — they apply to newfin too.
+Ten production failure modes surfaced while building and operating GNGM across related projects (LocalizationTools, newfin, vrsmanager). Read once, internalize — they apply universally.
 
 ## 1. Saturation signal — stop feeding when 20/20 topics return 9-10 facts
 
@@ -168,9 +168,79 @@ Never delete. Append-only correction pattern beats destructive edit.
 
 **Signal to watch for:** "subtle", "cross-cutting", "defense-in-depth", "robustness" framing from a reviewer + zero explicit test case to validate. Those adjectives correlate strongly with unverified recommendations.
 
+## 10. Qwen edge extraction fails silently on long episodes — use atomic fact episodes
+
+**Symptom:** `g.add_episode(...)` returns successfully. `FalkorDB GRAPH.QUERY` shows the Episodic node exists and even has a few Entity nodes attached via MENTIONS edges. But `g.search(query, group_ids=[...])` returns 0 facts for every query, even queries that exactly match entity names. Search stays broken across all topics.
+
+**How to detect — direct FalkorDB inspection:**
+
+```bash
+# Episodes present?
+docker exec falkordb redis-cli GRAPH.QUERY <graph> "MATCH (n:Episodic) RETURN count(n)"
+
+# Entities present?
+docker exec falkordb redis-cli GRAPH.QUERY <graph> "MATCH (n:Entity) RETURN count(n)"
+
+# The key metric — RELATES_TO edges (what search returns):
+docker exec falkordb redis-cli GRAPH.QUERY <graph> "MATCH ()-[r:RELATES_TO]->() RETURN count(r)"
+
+# If Entity count > 0 but RELATES_TO count == 0 → this bug.
+```
+
+**Root cause:** `graphiti_core` does entity extraction and relationship extraction as separate LLM calls. Qwen 3.5 9B is **reliable at entity extraction** even on long multi-paragraph bodies — but the **relationship extraction prompt more frequently returns non-JSON, truncated JSON, or references entities that weren't recognised in the first pass**, which the client silently drops. Long narrative episodes (multi-paragraph, code-block-heavy, "Connects: A → B → C" footers) exhibit this. Short sentences with one explicit verb per fact don't.
+
+The `qwen_client.py` salvage pipeline has retry logic for entity extraction but edge-extraction failures do not raise loudly — you just get zero RELATES_TO edges, which reads as "search broken" downstream.
+
+**Fix — write atomic fact episodes for anything you need to retrieve via search:**
+
+```python
+# BAD — one mega-episode (entities extract, relations mostly don't):
+await g.add_episode(
+    name='session-summary',
+    episode_body="""
+    Three pages of narrative about the ISSUE-008 fix, the new logging
+    infrastructure, the CI versioning migration... Connects: A → B → C.
+    Connects: D → E. Connects: F → G → H.
+    """,
+    ...
+)
+
+# GOOD — 10–20 atomic fact episodes (both entities AND relations extract):
+FACTS = [
+    ('perf-fact-1', 'The ISSUE-008 block had an O(n-squared) performance bug.'),
+    ('perf-fact-2', 'consumer_by_prev_idx replaces the linear scan with O(1) dict lookup.'),
+    ('perf-fact-3', 'process_working_comparison contains the ISSUE-008 fix block.'),
+    # ... one clean subject-verb-object sentence per episode
+]
+for name, body in FACTS:
+    await g.add_episode(name=name, episode_body=body, ...)
+```
+
+**Observed threshold (Qwen 3.5 9B):** bodies under ~50 words with one or two explicit relational verbs extract reliably. Bodies over ~200 words extract entities but usually drop all edges.
+
+**Verification rule — always check RELATES_TO count after any batch of episodes:**
+
+```python
+await g.add_episode(...)  # repeat N times
+# then:
+import subprocess
+out = subprocess.check_output([
+    'docker', 'exec', 'falkordb', 'redis-cli',
+    'GRAPH.QUERY', GRAPH_NAME,
+    "MATCH ()-[r:RELATES_TO]->() RETURN count(r)"
+]).decode()
+# Expect count to grow by ~1-3 edges per atomic episode. If it doesn't, edges failed.
+```
+
+**Meta-pattern match:** this is another instance of "surface-level success ≠ actual side effect" (see Meta-theme). The `add_episode()` call returns cleanly; only a post-hoc graph state check reveals the missing edges.
+
+**Operating rule:** for any important knowledge that future sessions need to retrieve via `g.search()`, write it as **atomic fact episodes**. A narrative handoff doc (human-readable) and an atomic-fact feed (graph-retrievable) are two different artefacts — don't try to serve both from one episode.
+
+**Source:** discovered while running the full GNGM pipeline on the vrsmanager project (2026-04-21). Two large narrative episodes (session summary + architecture backfill) produced 8 entities but zero edges; 18 atomic fact episodes immediately after produced 22 entities and 12 edges, restoring search.
+
 ## Meta-theme
 
-Six of the nine pitfalls share a theme: **something succeeded at the surface level (exit 0, HIGH confidence, "all green") but the actual side effect didn't happen.**
+Seven of the ten pitfalls share a theme: **something succeeded at the surface level (exit 0, HIGH confidence, "all green") but the actual side effect didn't happen.**
 
 - Heredoc+`&` exits 0 but python didn't run
 - ECC approves but code is impossible
@@ -178,6 +248,7 @@ Six of the nine pitfalls share a theme: **something succeeded at the surface lev
 - Patch commits to wrong clone
 - `find_dead` flags orphans but they're alive via Viking
 - Qwen returns 200 but salvage hasn't run yet
+- `add_episode` returns OK but no RELATES_TO edges → search stays broken
 
 **Defensive protocol:** for any operation you care about, verify the side effect independently. Don't trust exit codes. State-check the intended outcome, not the process that was supposed to produce it.
 

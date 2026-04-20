@@ -115,7 +115,7 @@ gngm/
 │   ├── 01-SETUP.md                 prerequisites + installation
 │   ├── 02-PROTOCOL.md              full 4-mode protocol mechanics
 │   ├── 03-CHEATSHEET.md            one-page quick reference
-│   └── 04-LESSONS.md               9 pitfalls + resilience patterns
+│   └── 04-LESSONS.md               10 pitfalls + resilience patterns
 ├── protocols/
 │   ├── NLF.md                      No Lie Fix — real root cause only
 │   ├── SDP.md                      Standard Development Protocol
@@ -192,7 +192,7 @@ This is an opinionated tool. If you have improvements or a different project str
 
 Developed during LocalizationTools project work (2026-04). Exported and generalized based on real production use. Battle-tested on two projects (LocalizationTools + newfin) before extracting to this standalone repo.
 
-See [docs/04-LESSONS.md](docs/04-LESSONS.md) for the 9 production pitfalls that shaped this design.
+See [docs/04-LESSONS.md](docs/04-LESSONS.md) for the 10 production pitfalls that shaped this design.
 
 ---
 
