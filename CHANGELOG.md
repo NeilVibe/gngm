@@ -2,6 +2,39 @@
 
 All notable changes to GNGM (the portable knowledge stack protocol).
 
+## [0.4.0] — 2026-04-23 — Full project scaffolding
+
+Tools alone weren't enough. GNGM now ships a full project structure bootstrapper so projects can harness the knowledge stack from day 1 — no manual scaffolding, no hunting for what's missing.
+
+### Added
+
+- **`scripts/gngm-full-scaffold.sh`** — full project scaffolder (idempotent, works on empty dirs AND existing repos, multi-CLI aware)
+- **`scripts/gngm-hygiene-check.sh`** — validates frontmatter + `## Related`/`## Docs` sections + MEMORY.md line count + docs/current/ file count
+- **`docs/05-PROJECT-STRUCTURE.md`** — canonical project tree, adaptation patterns for any language/stack, multi-CLI support
+- **`docs/06-WAVE-PROTOCOL.md`** — 7-stage wave lifecycle (OPEN → BRAINSTORM → PLAN REVIEW → EXECUTE → VERIFY → CODE REVIEW → CLOSE)
+- **`templates/`** directory with 18 template files:
+  - `CLAUDE.md.tpl` + `MEMORY.md.tpl`
+  - `memory/` branch templates (user, rules, active, reference)
+  - `docs/` tree `_INDEX.md` templates (INDEX, current, architecture, reference, protocols, waves, history)
+  - `lessons/` templates (_INDEX + domain template)
+  - `graphifyignore.tpl`, `gitignore.tpl`, `env-example.tpl`
+- **`docs/04-LESSONS.md`** Lesson #11 — "Tools installed ≠ project ready"
+
+### Adaptability
+
+- **Any CLI AI:** `--ai-cli claude` (CLAUDE.md) / `codex` (AGENTS.md) / `gemini` (GEMINI.md) / `all` (all three, identical content)
+- **Any stack:** language/framework-agnostic — your code tree sits alongside the GNGM scaffold
+- **Any repo state:** idempotent, grafts onto existing repos without clobbering
+
+### Updated
+
+- `README.md` — "Three paths to installation" section explaining install.sh vs gngm-init.sh vs gngm-full-scaffold.sh + CLI AI support
+- `README.md` repository structure — added `templates/`, updated `scripts/` + `docs/`
+
+### Why this release
+
+Discovered while bootstrapping `winacard` project: `gngm-init.sh` ran green but the project wasn't actually ready. Memory trunk missing, CLAUDE.md missing, docs tree not laid out, no `.graphifyignore`. Had to retrofit everything manually for 30 minutes. This release codifies that manual work so no future project has to repeat it.
+
 ## [0.3.0] — 2026-04-18 — Engineering protocols added
 
 Added universal engineering protocols that layer on top of the knowledge stack.

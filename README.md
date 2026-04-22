@@ -38,34 +38,53 @@ cd ~/gngm
 bash scripts/install-services.sh
 ```
 
-## Install in a new project (30 seconds)
+## Three paths to installation
+
+| Path | What it does | When to use |
+|---|---|---|
+| `install.sh` | Copies GNGM docs + protocols + scripts into `<project>/docs/GNGM/` | Minimal — just want the reference docs |
+| `gngm-init.sh` | Tools bootstrap: Graphify venv + hooks + Graphiti seed + health check | Just want the TOOLS |
+| **`gngm-full-scaffold.sh`** | **Full project structure: memory trunk + CLAUDE.md/AGENTS.md + docs tree + lessons + tools** | **Recommended — new projects OR grafting onto existing repos** |
+
+### Full scaffold (recommended, ~1 minute)
 
 ```bash
-# One-liner from anywhere — drops GNGM into target project
+# 1. Install GNGM files into target project
 curl -fsSL https://raw.githubusercontent.com/NeilVibe/gngm/main/install.sh | bash -s -- /path/to/your/project
 
-# Then bootstrap the target project
+# 2. Full scaffold (structure + tools, in one go)
 cd /path/to/your/project
-bash docs/GNGM/scripts/gngm-init.sh
+bash docs/GNGM/scripts/gngm-full-scaffold.sh
 ```
 
-Or manually:
+The full scaffold is **idempotent** — safe to re-run, never clobbers existing files. It works in empty dirs AND existing repos (grafts GNGM on without touching your code).
+
+### CLI AI support
+
+GNGM works with any CLI AI. The scaffold script supports:
 
 ```bash
-git clone https://github.com/NeilVibe/gngm.git ~/gngm
-cp -r ~/gngm/docs ~/gngm/scripts /path/to/your/project/docs/GNGM/
+bash gngm-full-scaffold.sh --ai-cli claude   # CLAUDE.md (default)
+bash gngm-full-scaffold.sh --ai-cli codex    # AGENTS.md (Codex CLI / Cursor / many)
+bash gngm-full-scaffold.sh --ai-cli gemini   # GEMINI.md (Gemini CLI)
+bash gngm-full-scaffold.sh --ai-cli all      # all three — multi-CLI project
+```
+
+Content is identical — only filename differs per CLI convention.
+
+### Tools only (no project scaffolding)
+
+```bash
 cd /path/to/your/project
 bash docs/GNGM/scripts/gngm-init.sh
 ```
 
-The `gngm-init.sh` script is idempotent — safe to re-run. It:
+`gngm-init.sh` just does tooling — Graphify venv + hooks + Graphiti seed + health check. Use when you've already got your own project structure and just want the knowledge-stack tools.
 
-1. Creates `lessons/` + `.neuraltree/wiki/` directories with `_INDEX.md` templates
-2. Auto-creates `.venv-graphify/` and installs `graphifyy[mcp]` if not already installed
-3. Installs `graphify` post-commit + post-checkout hooks (auto-refresh graph on every commit)
-4. Runs initial `graphify update .` AST build
-5. Seeds the Graphiti graph with a bootstrap episode (using current directory name)
-6. Runs the health check
+### Full structure documentation
+
+- **[docs/05-PROJECT-STRUCTURE.md](docs/05-PROJECT-STRUCTURE.md)** — canonical file tree, adaptation patterns for any language/stack, multi-CLI support
+- **[docs/06-WAVE-PROTOCOL.md](docs/06-WAVE-PROTOCOL.md)** — how waves/phases run against the structure (7-stage lifecycle)
 
 ## Prerequisites (shared across all projects)
 
@@ -115,17 +134,31 @@ gngm/
 │   ├── 01-SETUP.md                 prerequisites + installation
 │   ├── 02-PROTOCOL.md              full 4-mode protocol mechanics
 │   ├── 03-CHEATSHEET.md            one-page quick reference
-│   └── 04-LESSONS.md               10 pitfalls + resilience patterns
+│   ├── 04-LESSONS.md               11 pitfalls + resilience patterns
+│   ├── 05-PROJECT-STRUCTURE.md     canonical project tree + adaptation patterns
+│   └── 06-WAVE-PROTOCOL.md         wave lifecycle (7 stages) — works for any stack
 ├── protocols/
 │   ├── NLF.md                      No Lie Fix — real root cause only
 │   ├── SDP.md                      Standard Development Protocol
-│   └── TDD.md                      TDD baseline + First-Debug Protocol
+│   ├── TDD.md                      TDD baseline + First-Debug Protocol
+│   └── GIT-SAFETY.md               git safety rules
+├── templates/
+│   ├── CLAUDE.md.tpl               project-level instructions template
+│   ├── MEMORY.md.tpl               memory trunk template
+│   ├── memory/                     memory branch templates
+│   ├── docs/                       docs/ tree _INDEX templates
+│   ├── lessons/                    lesson domain templates
+│   ├── graphifyignore.tpl          standard exclusions
+│   ├── gitignore.tpl               standard gitignore
+│   └── env-example.tpl             env.example baseline
 ├── clients/graphiti/
 │   ├── qwen_client.py              vendored (Qwen 4-stage salvage pipeline)
 │   └── feed_project.py             project seeding helper
 └── scripts/
     ├── gngm-health.sh              10-second 4-tool health check
-    ├── gngm-init.sh                idempotent project bootstrap
+    ├── gngm-init.sh                tool bootstrap (graphify + Graphiti)
+    ├── gngm-full-scaffold.sh       FULL project scaffold (structure + tools)
+    ├── gngm-hygiene-check.sh       validate frontmatter + cross-refs
     └── install-services.sh         one-shot services installer
 ```
 

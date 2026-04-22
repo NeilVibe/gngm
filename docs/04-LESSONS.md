@@ -1,6 +1,6 @@
 # GNGM Lessons — Pitfalls + Resilience Patterns
 
-Ten production failure modes surfaced while building and operating GNGM across related projects (LocalizationTools, newfin, vrsmanager). Read once, internalize — they apply universally.
+Eleven production failure modes surfaced while building and operating GNGM across related projects (LocalizationTools, newfin, vrsmanager, winacard). Read once, internalize — they apply universally.
 
 ## 1. Saturation signal — stop feeding when 20/20 topics return 9-10 facts
 
@@ -237,6 +237,38 @@ out = subprocess.check_output([
 **Operating rule:** for any important knowledge that future sessions need to retrieve via `g.search()`, write it as **atomic fact episodes**. A narrative handoff doc (human-readable) and an atomic-fact feed (graph-retrievable) are two different artefacts — don't try to serve both from one episode.
 
 **Source:** discovered while running the full GNGM pipeline on the vrsmanager project (2026-04-21). Two large narrative episodes (session summary + architecture backfill) produced 8 entities but zero edges; 18 atomic fact episodes immediately after produced 22 entities and 12 edges, restoring search.
+
+## 11. Tools installed ≠ project ready — scaffold the structure too
+
+**Symptom:** `gngm-init.sh` ran green (Graphify venv, hooks installed, Graphiti seeded, health check green). You start work, but every new session relearns the project from scratch. Lessons accumulate as flat `lessons/<random>.md` files that never compile. The MEMORY.md trunk doesn't exist. `CLAUDE.md` doesn't exist. Discovery is broken because nothing cross-links. The knowledge tools are running at maybe 40% of their potential.
+
+**Root cause:** `gngm-init.sh` bootstraps the GNGM **TOOLS**. It does NOT bootstrap the GNGM **STRUCTURE** those tools are most productive against:
+
+- Claude Code's auto-memory trunk at `~/.claude/projects/<id>/memory/` — silent gap
+- Project-level `CLAUDE.md` / `AGENTS.md` / `GEMINI.md` — auto-load session context, missing = discipline doesn't fire at session start
+- `docs/` tree convention (current/ architecture/ reference/ protocols/ waves/ history/)
+- Lesson domain pre-seeding (reduces chaotic accumulation)
+- `.graphifyignore` defaults (Graphify indexes `.venv/`, `node_modules/`, generated assets without exclusions)
+- Wave protocol conventions
+
+Each gap individually is survivable. Together they compound into "the tools work but the system doesn't."
+
+**Fix — use `gngm-full-scaffold.sh` instead of (or in addition to) `gngm-init.sh`:**
+
+```bash
+# Recommended for new projects
+curl -fsSL https://raw.githubusercontent.com/NeilVibe/gngm/main/install.sh | bash -s -- /path/to/project
+cd /path/to/project
+bash docs/GNGM/scripts/gngm-full-scaffold.sh
+```
+
+The full scaffold is idempotent — safe to re-run, never clobbers existing files. Works on empty dirs AND existing repos (grafts GNGM onto existing code without touching it).
+
+**Operating rule:** for new projects, always run `gngm-full-scaffold.sh`, not `gngm-init.sh`. For existing projects getting retrofitted with GNGM, same script — it detects what's there and only fills gaps.
+
+**Verification:** after scaffold, run `gngm-hygiene-check.sh` — validates every `.md` has frontmatter + `## Related` + `## Docs`, MEMORY.md ≤ 100 lines, `docs/current/` ≤ 3 files. All green = scaffold complete.
+
+**Source:** discovered while bootstrapping a new project (2026-04-23). Tools were green but memory trunk + CLAUDE.md + docs tree were missing. Had to retrofit everything manually. `gngm-full-scaffold.sh` codifies that manual work so nobody else has to.
 
 ## Meta-theme
 
