@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GNGM — AI 코딩 에이전트를 위한 지식 스택 (기술 개요)</title>
+<meta name="description" content="GNGM: knowledge graph, AST 코드 그래프, canonical wiki, cross-session entity graph를 결합한 4계층 구조. SDP/NLF 공학 규율과 함께 사용." />
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+<link rel="stylesheet" as="style" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css" />
+
+<style>
+/* ---------- tokens ---------- */
+:root {
+  --bg:            #07070c;
+  --bg-soft:       #0e0e16;
+  --bg-card:       #14141f;
+  --bg-inset:      #0a0a12;
+  --line:          #23233380;
+  --line-strong:   #2e2e42;
+  --text:          #e8e8f0;
+  --text-muted:    #9898ac;
+  --text-dim:      #5e5e74;
+  --accent:        #00d9ff;
+  --accent-2:      #9d4edd;
+  --accent-3:      #ff6b9d;
+  --warn:          #ffb454;
+  --danger:        #ff5470;
+  --mono:          ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  --sans:          "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, sans-serif;
+  --max:           980px;
+  --pad:           clamp(1.25rem, 4vw, 2rem);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.75;
+  letter-spacing: -0.01em;
+  overflow-x: hidden;
+  word-break: keep-all;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(800px 600px at 85% -10%, rgba(157, 78, 221, 0.08), transparent 60%),
+    radial-gradient(900px 700px at -10% 30%, rgba(0, 217, 255, 0.05), transparent 60%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.wrap {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 var(--pad);
+}
+
+section {
+  padding: clamp(3rem, 7vw, 5rem) 0;
+  border-top: 1px solid var(--line);
+}
+section:first-of-type { border-top: none; }
+
+/* ---------- nav ---------- */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  padding: 0.85rem var(--pad);
+  background: rgba(7, 7, 12, 0.8);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid transparent;
+  z-index: 100;
+  transition: border-color 0.3s;
+}
+.nav.scrolled { border-bottom-color: var(--line); }
+.nav .wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0;
+  max-width: var(--max);
+}
+.nav .logo {
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 0.88rem;
+  letter-spacing: 0.12em;
+  color: var(--text);
+}
+.nav .logo .tag {
+  color: var(--text-dim);
+  font-weight: 400;
+  margin-left: 0.5rem;
+}
+.nav-links {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-family: var(--mono);
+}
+.nav-links a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--accent); }
+@media (max-width: 780px) {
+  .nav-links { display: none; }
+}
+
+/* ---------- hero / masthead ---------- */
+.masthead {
+  padding: 9rem 0 4rem;
+  border-top: none;
+}
+.doc-meta {
+  display: flex;
+  gap: 1.5rem;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.doc-meta span::before {
+  content: "◦ ";
+  color: var(--accent);
+}
+
+.masthead h1 {
+  font-size: clamp(2rem, 4.5vw, 3rem);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  margin-bottom: 1rem;
+}
+.masthead .subtitle {
+  font-size: clamp(1.05rem, 1.8vw, 1.2rem);
+  color: var(--text-muted);
+  max-width: 720px;
+  font-weight: 400;
+  line-height: 1.7;
+}
+
+.abstract {
+  margin-top: 2.5rem;
+  padding: 1.5rem 1.75rem;
+  background: var(--bg-inset);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+}
+.abstract .label {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.abstract p {
+  font-size: 0.98rem;
+  color: var(--text);
+  line-height: 1.7;
+}
+
+/* ---------- section headers ---------- */
+.sec-num {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  letter-spacing: 0.12em;
+  margin-bottom: 0.75rem;
+}
+.sec-title {
+  font-size: clamp(1.5rem, 2.8vw, 1.85rem);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.25rem;
+  color: var(--text);
+}
+.sec-intro {
+  font-size: 1rem;
+  color: var(--text-muted);
+  margin-bottom: 2.5rem;
+  max-width: 760px;
+}
+
+h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.015em;
+}
+h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-top: 1.5rem;
+  margin-bottom: 0.4rem;
+  color: var(--text);
+  font-family: var(--mono);
+  letter-spacing: 0.02em;
+}
+
+p { margin-bottom: 1rem; color: var(--text-muted); font-size: 0.98rem; }
+p strong, li strong { color: var(--text); font-weight: 600; }
+em { color: var(--text-muted); font-style: italic; }
+code {
+  font-family: var(--mono);
+  font-size: 0.88em;
+  padding: 0.1rem 0.35rem;
+  background: var(--bg-inset);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  color: var(--accent);
+}
+
+/* ---------- problem prose ---------- */
+.prose-block {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--text-muted);
+}
+.prose-block p { margin-bottom: 1.1rem; }
+
+.limits-table {
+  margin-top: 2rem;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.93rem;
+}
+.limits-table th, .limits-table td {
+  padding: 0.9rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+.limits-table th {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-weight: 600;
+  border-bottom: 1px solid var(--line-strong);
+}
+.limits-table td:first-child {
+  font-family: var(--mono);
+  color: var(--accent);
+  white-space: nowrap;
+  font-weight: 600;
+}
+.limits-table td { color: var(--text-muted); }
+
+/* ---------- layer technical cards ---------- */
+.layer-block {
+  margin-top: 2rem;
+  padding: 1.75rem 1.75rem 1.5rem;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  position: relative;
+}
+.layer-block::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+  background: var(--lc);
+  border-radius: 10px 0 0 10px;
+}
+.layer-1 { --lc: #00d9ff; }
+.layer-2 { --lc: #ff6b9d; }
+.layer-3 { --lc: #9d4edd; }
+.layer-4 { --lc: #ffb454; }
+
+.layer-head {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.layer-tag {
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  padding: 0.25rem 0.6rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  color: var(--lc);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+.layer-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+.layer-name small {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  font-weight: 400;
+  margin-left: 0.6rem;
+  letter-spacing: 0.03em;
+}
+
+.layer-block h4 {
+  color: var(--lc);
+  margin-top: 1.25rem;
+  margin-bottom: 0.35rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-family: var(--mono);
+  font-weight: 700;
+}
+.layer-block h4:first-of-type { margin-top: 0; }
+
+.layer-block p, .layer-block ul li {
+  font-size: 0.94rem;
+  line-height: 1.7;
+  color: var(--text-muted);
+}
+.layer-block ul {
+  list-style: none;
+  padding: 0;
+}
+.layer-block ul li {
+  padding: 0.3rem 0 0.3rem 1.25rem;
+  position: relative;
+}
+.layer-block ul li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  color: var(--lc);
+  opacity: 0.6;
+}
+
+.limit-line {
+  margin-top: 0.75rem;
+  padding: 0.65rem 0.9rem;
+  background: rgba(255, 84, 112, 0.04);
+  border-left: 2px solid var(--danger);
+  border-radius: 0 4px 4px 0;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+.limit-line strong { color: var(--danger); font-weight: 700; font-size: 0.8rem; letter-spacing: 0.08em; display: block; margin-bottom: 0.15rem; font-family: var(--mono); }
+
+/* ---------- code / flow ---------- */
+.code-block {
+  margin-top: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--bg-inset);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 0.84rem;
+  line-height: 1.9;
+  color: var(--text-muted);
+  overflow-x: auto;
+}
+.code-block .c { color: var(--text-dim); font-style: italic; }
+.code-block .k { color: var(--accent); }
+.code-block .s { color: var(--accent-2); }
+.code-block .a { color: var(--warn); }
+
+/* ---------- theory grid ---------- */
+.theory-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+@media (max-width: 780px) {
+  .theory-grid { grid-template-columns: 1fr; }
+}
+.theory {
+  padding: 1.5rem 1.75rem;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.theory h3 {
+  margin-top: 0;
+  color: var(--text);
+  font-size: 1.05rem;
+  font-family: var(--mono);
+  letter-spacing: 0.02em;
+  padding-bottom: 0.6rem;
+  margin-bottom: 0.9rem;
+  border-bottom: 1px solid var(--line);
+}
+.theory p { font-size: 0.92rem; line-height: 1.7; }
+.theory p:last-child { margin-bottom: 0; }
+.theory blockquote {
+  margin: 0.9rem 0;
+  padding: 0.6rem 1rem;
+  border-left: 2px solid var(--accent);
+  font-style: italic;
+  color: var(--text);
+  font-size: 0.92rem;
+  background: rgba(0, 217, 255, 0.04);
+  border-radius: 0 4px 4px 0;
+}
+
+/* ---------- protocol cards ---------- */
+.proto-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-top: 2rem;
+}
+@media (max-width: 800px) {
+  .proto-grid { grid-template-columns: 1fr; }
+}
+.proto {
+  padding: 1.75rem 1.85rem;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.proto-tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  font-weight: 700;
+  margin-bottom: 0.85rem;
+  text-transform: uppercase;
+}
+.proto-sdp .proto-tag {
+  background: rgba(0, 217, 255, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(0, 217, 255, 0.3);
+}
+.proto-nlf .proto-tag {
+  background: rgba(255, 180, 84, 0.1);
+  color: var(--warn);
+  border: 1px solid rgba(255, 180, 84, 0.3);
+}
+.proto h3 {
+  margin-top: 0;
+  font-size: 1.2rem;
+  margin-bottom: 0.4rem;
+}
+.proto-sub {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.steps {
+  list-style: none;
+  counter-reset: step;
+  display: grid;
+  gap: 0.55rem;
+}
+.steps li {
+  counter-increment: step;
+  position: relative;
+  padding: 0.7rem 0.9rem 0.7rem 2.6rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-left: 2px solid var(--line-strong);
+  border-radius: 0 4px 4px 0;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+.steps li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1.45rem; height: 1.45rem;
+  background: var(--accent);
+  color: #000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 0.78rem;
+}
+.steps li strong { color: var(--text); }
+.steps li span { color: var(--text-muted); display: block; font-size: 0.82rem; margin-top: 0.15rem; font-weight: 400; }
+
+.forbidden {
+  display: grid;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+.forbid {
+  padding: 0.7rem 0.9rem 0.7rem 2.3rem;
+  background: rgba(255, 84, 112, 0.04);
+  border: 1px solid rgba(255, 84, 112, 0.18);
+  border-radius: 4px;
+  position: relative;
+  font-size: 0.88rem;
+}
+.forbid::before {
+  content: "✕";
+  position: absolute;
+  left: 0.85rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--danger);
+  font-weight: 700;
+  font-family: var(--mono);
+}
+.forbid strong { color: var(--text); font-weight: 600; display: block; margin-bottom: 0.1rem; }
+.forbid span { color: var(--text-muted); font-size: 0.8rem; }
+
+.verify-criteria {
+  margin-top: 1rem;
+  padding: 1rem 1.2rem;
+  background: rgba(255, 180, 84, 0.04);
+  border: 1px solid rgba(255, 180, 84, 0.2);
+  border-radius: 6px;
+  font-size: 0.88rem;
+}
+.verify-criteria .k {
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--warn);
+  display: block;
+  margin-bottom: 0.6rem;
+  text-transform: uppercase;
+}
+.verify-criteria ol {
+  padding-left: 1.25rem;
+  color: var(--text-muted);
+}
+.verify-criteria ol li { padding: 0.15rem 0; }
+
+/* ---------- workflow ---------- */
+.workflow {
+  margin-top: 2rem;
+  padding: 1.75rem;
+  background: var(--bg-inset);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  line-height: 1.95;
+  color: var(--text-muted);
+  overflow-x: auto;
+}
+.workflow .phase {
+  color: var(--accent);
+  font-weight: 700;
+  margin-top: 0.8rem;
+  display: block;
+  letter-spacing: 0.02em;
+}
+.workflow .phase:first-child { margin-top: 0; }
+.workflow .sub { padding-left: 1.5rem; display: block; color: var(--text-muted); }
+.workflow .c { color: var(--text-dim); }
+.workflow .a { color: var(--accent-2); }
+.workflow .h { color: var(--warn); }
+
+/* ---------- footer ---------- */
+footer {
+  padding: 2.5rem var(--pad) 3rem;
+  border-top: 1px solid var(--line);
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  line-height: 1.7;
+}
+footer .wrap { max-width: var(--max); }
+footer .brand {
+  font-family: var(--mono);
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+/* ---------- reveal ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  html { scroll-behavior: auto; }
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap">
+    <div class="logo">GNGM <span class="tag">기술 개요</span></div>
+    <ul class="nav-links">
+      <li><a href="#problem">문제 정의</a></li>
+      <li><a href="#layers">4계층</a></li>
+      <li><a href="#theory">이론</a></li>
+      <li><a href="#protocols">SDP · NLF</a></li>
+      <li><a href="#workflow">워크플로우</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ============== MASTHEAD ============== -->
+<header class="masthead">
+  <div class="wrap">
+    <div class="doc-meta reveal">
+      <span>기술 개요 문서</span>
+      <span>AI 코딩 에이전트 지식 스택</span>
+      <span>GNGM + SDP + NLF</span>
+    </div>
+
+    <h1 class="reveal">GNGM: AI 코딩 에이전트를 위한 4계층 지식 스택</h1>
+
+    <p class="subtitle reveal">
+      knowledge graph · symbolic code graph · canonical wiki · cross-session entity graph.
+      서로 다른 자료구조가 서로 다른 유형의 지식 질문에 답하며,
+      SDP/NLF 공학 규율이 이 지식을 정직하게 활용하도록 보장합니다.
+    </p>
+
+    <div class="abstract reveal">
+      <div class="label">요약</div>
+      <p>
+        AI 코딩 에이전트는 기본적으로 <strong>stateless</strong>하게 동작합니다 — 세션이 끝나면 작업 문맥이 사라지고,
+        동일한 지식을 매 세션마다 다시 유도해야 합니다.
+        GNGM은 이 제약을 <strong>4개의 이질적 저장소</strong>로 분산 해결합니다:
+        LLM이 추출한 사실 그래프(Graphiti), 증상별 경험과 정제된 위키(NeuralTree),
+        AST 기반 코드 구조 그래프(Graphify), cross-session 엔티티 그래프(MemoryMCP).
+        각 계층은 <strong>grep이나 semantic search로는 답할 수 없는</strong> 고유한 질문 유형을 담당합니다.
+      </p>
+    </div>
+  </div>
+</header>
+
+<!-- ============== 1. PROBLEM DEFINITION ============== -->
+<section id="problem">
+  <div class="wrap">
+    <div class="sec-num reveal">§1 · 문제 정의</div>
+    <h2 class="sec-title reveal">기존 검색 도구로는 답할 수 없는 질문들</h2>
+    <p class="sec-intro reveal">
+      AI 코딩 에이전트가 답해야 할 질문은 세 가지 층위로 나뉘며, 각 층위마다 적합한 자료구조가 다릅니다.
+      단일 도구로 모든 층위를 커버하려 하면 반드시 한쪽에서 실패합니다.
+    </p>
+
+    <div class="prose-block reveal">
+      <p>
+        AI 코딩 에이전트의 근본적 제약은 두 가지입니다. 첫째, 실행 모델이 <strong>stateless</strong>하다는 점 —
+        세션 종료 시 context window의 내용이 모두 소실되므로, 이전 세션에서 확립된 의사결정 맥락, 버그 수정 이력, 사용자 선호 같은
+        정보가 다음 세션으로 이어지지 않습니다. 둘째, <strong>context window</strong>가 유한하다는 점 —
+        프로젝트 전체 코드와 문서를 매번 로드할 수 없으므로 선별적 검색이 필수입니다.
+      </p>
+      <p>
+        이를 해결하기 위해 보통 <strong>RAG</strong> 패턴이 쓰이지만, 단일 retrieval 방식(대개 벡터 기반 의미 검색)으로는
+        다음과 같은 질문들에 제대로 답할 수 없습니다.
+      </p>
+    </div>
+
+    <table class="limits-table reveal">
+      <thead>
+        <tr>
+          <th>질문 유형</th>
+          <th>예시</th>
+          <th>기존 도구가 실패하는 이유</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>구조 (structural)</td>
+          <td>"이 함수를 호출하는 모든 함수는?"</td>
+          <td>grep은 문자열 일치만 함. 의미 검색은 구조를 모름. AST 그래프가 필요함.</td>
+        </tr>
+        <tr>
+          <td>관계 (relational)</td>
+          <td>"A 컴포넌트 변경이 B에 미치는 영향은?"</td>
+          <td>벡터 유사도는 "비슷한 주제"만 찾음. 인과 관계는 그래프 순회가 필요함.</td>
+        </tr>
+        <tr>
+          <td>시간 (temporal)</td>
+          <td>"왜 이 방식으로 결정되었고 언제 바뀌었나?"</td>
+          <td>현재 코드 상태만으로는 결정 이력을 복원 불가. 시간 레이어가 필요함.</td>
+        </tr>
+        <tr>
+          <td>경험 (episodic)</td>
+          <td>"이 증상을 전에 고친 적 있나?"</td>
+          <td>코드에는 버그 수정 과정이 남지 않음. 증상-원인-수정 단위의 경험 기록이 필요함.</td>
+        </tr>
+        <tr>
+          <td>선호 (preferential)</td>
+          <td>"사용자가 이 상황에서 원하는 방식은?"</td>
+          <td>프로젝트 파일에 존재하지 않음. 별도 persistent store가 필요함.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="prose-block reveal" style="margin-top: 2rem;">
+      <p>
+        GNGM의 설계 전제는 이 <strong>다섯 질문 유형이 서로 다른 자료구조를 요구한다</strong>는 것입니다.
+        하나의 만능 저장소 대신 네 개의 특화 저장소를 병렬로 쿼리하고, 결과를 종합해 답을 구성합니다.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============== 2. FOUR LAYERS ============== -->
+<section id="layers">
+  <div class="wrap">
+    <div class="sec-num reveal">§2 · 4계층 구조</div>
+    <h2 class="sec-title reveal">각 계층의 기술적 구성과 이론적 근거</h2>
+    <p class="sec-intro reveal">
+      네 계층은 독립된 도구이지만, 하나의 trigger(<code>GNGM</code>)로 동시에 호출되어 결과를 병합합니다.
+      각 계층은 고유한 질문 유형에 대해 권위 있는 답을 제공하며, 담당 밖의 질문에는 답하지 않습니다.
+    </p>
+
+    <!-- GRAPHITI -->
+    <div class="layer-block layer-1 reveal">
+      <div class="layer-head">
+        <span class="layer-tag">G₁</span>
+        <span class="layer-name">Graphiti <small>temporal knowledge graph</small></span>
+      </div>
+
+      <h4>정의</h4>
+      <p>
+        Zep Inc.에서 오픈소스로 공개한 temporal knowledge graph 프레임워크.
+        LLM이 자연어 텍스트(여기선 작업 로그, 의사결정 메모 등)에서 엔티티와 관계를 추출해 시간축이 있는 그래프에 저장합니다.
+        이 구축 환경에서는 Qwen 3.5 9B 모델을 Ollama로 로컬 실행하여 추출하고, FalkorDB(Redis Graph fork)에 저장합니다.
+      </p>
+
+      <h4>이론적 근거</h4>
+      <p>
+        지식은 <strong>사실(facts)</strong>과 <strong>시간(temporal validity)</strong>의 결합입니다.
+        "X는 Y를 호출한다"는 명제는 2024년 3월엔 참이었지만 리팩토링 이후 거짓일 수 있습니다.
+        전통적인 RDF/OWL 기반 그래프는 사실만 저장하고 시간 차원이 없어, 충돌하는 사실을 화해시키지 못합니다.
+        Graphiti는 각 엣지에 <code>valid_at</code>, <code>invalid_at</code>을 부여해 <strong>temporal resolution</strong> —
+        즉 "현재 시점에 참인 사실"을 자동으로 선별합니다. 충돌 시 최신이 우선하며, 과거 사실은 supersede되어 보관됩니다.
+      </p>
+
+      <h4>검색 메커니즘</h4>
+      <p>
+        단일 방식이 아닌 <strong>hybrid search</strong>:
+        ① Model2Vec 기반 벡터 유사도 (256차원 다국어 임베딩) ②
+        BM25 lexical score ③ 그래프 순회 보너스 (쿼리 엔티티의 인접 노드 가중치 상승)를 합산합니다.
+        의미 유사도만으로는 놓치는 구조적 관계와, 구조만으로는 놓치는 의역을 동시에 포착합니다.
+      </p>
+
+      <h4>담당 질문</h4>
+      <ul>
+        <li>"어떤 엔티티들이 X와 연결되는가" (blast radius 분석)</li>
+        <li>"왜 이 방식으로 결정되었는가" (의사결정 이력)</li>
+        <li>"최근 Y에 대해 무엇이 바뀌었는가" (temporal query)</li>
+      </ul>
+
+      <div class="limit-line">
+        <strong>LIMITS</strong>
+        LLM 추출에 의존하므로 입력 텍스트가 부실하면 엔티티 누락 발생.
+        "정확히 이 함수를 호출하는 함수 목록" 같은 결정적(deterministic) 구조 쿼리는 약함 — Graphify가 담당.
+      </div>
+    </div>
+
+    <!-- NEURALTREE -->
+    <div class="layer-block layer-2 reveal">
+      <div class="layer-head">
+        <span class="layer-tag">N</span>
+        <span class="layer-name">NeuralTree <small>lesson store + canonical wiki pipeline</small></span>
+      </div>
+
+      <h4>정의</h4>
+      <p>
+        증상 기반 lesson 저장소와, 그 lesson들을 자동으로 정제된 위키 페이지로 증류하는 파이프라인.
+        각 lesson은 <code>symptom · root_cause · fix · chain · key_file</code>이라는
+        고정 스키마로 기록되어, 증상 문자열로 과거 수정 이력을 검색할 수 있습니다.
+      </p>
+
+      <h4>이론적 근거 — Karpathy의 WikiLLM 패턴</h4>
+      <p>
+        Andrej Karpathy가 제시한 통찰: <em>"좋은 학습 데이터의 모습은 Wikipedia다"</em> —
+        즉 산발적 경험 로그가 아니라, <strong>정제되고 서로 링크된 canonical 문서</strong>여야 재사용 가능합니다.
+        NeuralTree는 이를 두 단계로 구현합니다. ① 세션마다 atomic lesson을 축적 ②
+        도메인당 3개 이상 쌓이면 <code>compile()</code>이 LLM 합성을 통해 <code>.neuraltree/wiki/&lt;domain&gt;.md</code>로 증류.
+        증류된 위키는 의미 검색 인덱스(Viking)에 재투입되어 다음 세션이 재활용합니다.
+      </p>
+
+      <h4>왜 자동 증류인가</h4>
+      <p>
+        수동 문서화는 소프트웨어 공학에서 가장 오래된 실패 패턴 중 하나입니다 — 개발자가 꾸준히 하지 않습니다.
+        원자 단위 lesson 기록은 진입 장벽이 낮아 유지되고, 증류는 LLM이 담당하므로 자동으로 scale됩니다.
+        이는 수동 문서화 대비 compliance 비용을 크게 낮추면서도 지식의 재활용 가능성을 유지합니다.
+      </p>
+
+      <h4>담당 질문</h4>
+      <ul>
+        <li>"이 증상을 전에 해결한 기록이 있는가"</li>
+        <li>"이 도메인의 표준적인 수정 패턴은 무엇인가"</li>
+        <li>"반복되는 pitfall은 무엇인가"</li>
+      </ul>
+
+      <div class="limit-line">
+        <strong>LIMITS</strong>
+        기록되지 않은 경험은 찾을 수 없음 — post-fix 단계에서 <code>lesson_add</code> 호출이 반드시 일어나야 하며, 이는 SDP 규율로 보장.
+      </div>
+    </div>
+
+    <!-- GRAPHIFY -->
+    <div class="layer-block layer-3 reveal">
+      <div class="layer-head">
+        <span class="layer-tag">G₂</span>
+        <span class="layer-name">Graphify <small>AST-based code graph</small></span>
+      </div>
+
+      <h4>정의</h4>
+      <p>
+        소스 코드를 AST(Abstract Syntax Tree)로 파싱하여 함수/클래스/파일 노드와 호출/import/상속 엣지로 이루어진 그래프를 추출합니다.
+        언어 중립적 파서(tree-sitter 계열)를 사용해 다양한 언어를 지원하며, 추출 후 <strong>Leiden 커뮤니티 검출 알고리즘</strong>으로
+        코드를 자연스러운 모듈 단위로 클러스터링합니다.
+      </p>
+
+      <h4>이론적 근거 — 코드는 본질적으로 그래프</h4>
+      <p>
+        코드는 텍스트 파일의 모음이 아니라 <strong>호출 관계의 그래프</strong>입니다.
+        LLM 컨텍스트에 코드를 prose로 제공하면 관계 정보가 손실되고, LLM은 이를 추론으로 복원하려다 자주 hallucination합니다.
+        AST 파싱 결과를 그래프 형태로 유지하면 "무엇이 무엇을 호출하는가"가 <strong>결정적 사실</strong>이 됩니다 —
+        LLM 추론 없이 파싱된 엣지를 그대로 반환하므로 hallucination 가능성이 0에 가깝습니다.
+      </p>
+
+      <h4>Leiden 커뮤니티 검출</h4>
+      <p>
+        Traag et al.(2019)이 Louvain 알고리즘의 단점(disconnected community 문제)을 개선해 제안한 방법.
+        코드 그래프에서 밀접하게 연결된 노드 집합을 자동으로 식별하며, 이는 보통 개발자가 인식하는 "모듈 경계"와 잘 일치합니다.
+        결과적으로 토큰 예산 내에서 "이 쿼리와 가장 관련 있는 코드 영역"을 효율적으로 선별할 수 있습니다.
+      </p>
+
+      <h4>담당 질문</h4>
+      <ul>
+        <li>"X 함수를 호출하는 함수 목록" (결정적)</li>
+        <li>"A에서 B까지의 호출 경로"</li>
+        <li>"이 엔티티의 구조적 이웃"</li>
+      </ul>
+
+      <div class="limit-line">
+        <strong>LIMITS</strong>
+        "왜 이렇게 설계되었는가" 같은 의도/이력 질문에는 답할 수 없음 — Graphiti 담당.
+        동적 dispatch나 리플렉션은 AST로 완전히 추적 불가.
+      </div>
+    </div>
+
+    <!-- MEMORYMCP -->
+    <div class="layer-block layer-4 reveal">
+      <div class="layer-head">
+        <span class="layer-tag">M</span>
+        <span class="layer-name">MemoryMCP <small>cross-session entity graph</small></span>
+      </div>
+
+      <h4>정의</h4>
+      <p>
+        Anthropic의 <strong>Model Context Protocol (MCP)</strong> 위에 구축된 cross-session entity graph.
+        엔티티(사용자 선호, 프로젝트 규칙, 외부 시스템 포인터 등)를 <code>name · type · observations · relations</code> 구조로 저장하고,
+        모든 세션에서 동일한 인터페이스로 접근합니다.
+      </p>
+
+      <h4>이론적 근거 — MCP 표준의 의미</h4>
+      <p>
+        MCP는 LLM 에이전트가 외부 리소스(파일 시스템, 데이터베이스, 웹 등)에 표준화된 방식으로 접근하게 해주는 프로토콜입니다.
+        Memory 서버를 MCP로 구현하면 <strong>에이전트 종류와 무관하게 동일한 지식 상태</strong>에 접근할 수 있습니다 —
+        Claude Code, Codex CLI, Gemini CLI 등이 모두 같은 memory store를 공유합니다.
+        이는 조직 내 여러 에이전트가 공존하는 환경에서 필수적인 설계입니다.
+      </p>
+
+      <h4>담당 질문</h4>
+      <ul>
+        <li>"사용자가 이 상황에서 선호하는 방식"</li>
+        <li>"프로젝트 전체에 적용되는 규칙"</li>
+        <li>"외부 시스템의 참조 포인터 (예: 대시보드 URL, 이슈 트래커 프로젝트 ID)"</li>
+      </ul>
+
+      <div class="limit-line">
+        <strong>LIMITS</strong>
+        저장된 사실의 진위는 보장되지 않음 — 틀린 기억이 발견되면 NLF 규율에 따라 supersede 및 correction 필요.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== 3. THEORY DEEP-DIVE ============== -->
+<section id="theory">
+  <div class="wrap">
+    <div class="sec-num reveal">§3 · 이론적 심화</div>
+    <h2 class="sec-title reveal">knowledge graph와 wiki 증류의 이론적 위치</h2>
+    <p class="sec-intro reveal">
+      왜 이 두 가지 자료구조가 LLM 에이전트의 지식 관리에 핵심적인지, 학술적 배경과 함께 정리합니다.
+    </p>
+
+    <div class="theory-grid">
+      <div class="theory reveal">
+        <h3>knowledge graph 이론</h3>
+        <p>
+          <strong>관계형 데이터</strong>는 그래프 자료구조가 가장 자연스럽게 표현합니다.
+          벡터 임베딩은 유사도는 잘 잡지만, 인과 사슬(A → B → C)이나 비대칭 관계("A는 B에 의존하지만 역은 아님")를
+          구분하지 못합니다.
+        </p>
+        <blockquote>
+          "의미가 비슷한 것"과 "실제로 연결된 것"은 다른 문제다.
+        </blockquote>
+        <p>
+          knowledge graph는 이 두 문제를 분리해서 접근합니다. 엔티티 노드는 벡터 임베딩을 가지고(의미 유사도),
+          관계 엣지는 형식적 타입을 가집니다(관계의 종류). 검색은 두 신호를 모두 활용합니다.
+        </p>
+        <p>
+          Graphiti가 특히 <strong>hybrid search</strong>(vector + BM25 + 그래프 순회)를 채택한 이유입니다.
+          세 신호 중 하나라도 빠지면 특정 유형의 쿼리에서 recall이 급락합니다.
+        </p>
+      </div>
+
+      <div class="theory reveal">
+        <h3>지식 증류 (Wiki 패턴)</h3>
+        <p>
+          Karpathy가 LLM 학습 데이터 품질을 논하며 제시한 관찰: <em>Wikipedia가 좋은 학습 데이터인 이유는 내용 자체가 아니라
+          "정제되고 상호 링크된 canonical 형태"이기 때문</em>이다.
+        </p>
+        <blockquote>
+          Raw experience ≠ 지식. Distilled, cross-linked document = 지식.
+        </blockquote>
+        <p>
+          이 관찰은 두 가지 설계 결정으로 이어집니다.
+          첫째, 경험은 <strong>atomic 단위</strong>로 기록 — 기록 장벽을 낮춰 compliance 확보.
+          둘째, N개가 쌓이면 <strong>LLM 합성</strong>으로 정제된 페이지 생성 — scale이 가능.
+        </p>
+        <p>
+          결과적으로 세션 n+1은 세션 n이 남긴 lesson뿐 아니라, 그 lesson이 포함된 distilled wiki에도 접근합니다.
+          지식이 <strong>복리처럼</strong> 누적되는 구조입니다.
+        </p>
+      </div>
+
+      <div class="theory reveal">
+        <h3>Temporal resolution</h3>
+        <p>
+          코드베이스는 <strong>시간 의존적 사실</strong>로 가득합니다.
+          "Phase 130에서 TM cascade는 single HNSW였다", "Phase 135에서 per-pair 구조로 변경".
+          두 사실은 모두 각자의 시점에 참이고, 단순히 전자를 삭제하면 과거 커밋 분석 시 맥락이 사라집니다.
+        </p>
+        <p>
+          Graphiti의 temporal layer는 사실에 <code>valid_at</code> / <code>invalid_at</code>을 부여해
+          "현재 참인 사실"과 "과거 참이었던 사실"을 동시에 유지합니다. 충돌 시 자동으로 최신이 이깁니다.
+          NeuralTree도 유사하게 compile된 위키를 새 버전으로 supersede할 수 있습니다.
+        </p>
+      </div>
+
+      <div class="theory reveal">
+        <h3>결정적 vs 확률적 분리</h3>
+        <p>
+          시스템에 LLM이 관여하는 곳과 안 하는 곳을 <strong>명확히 분리</strong>하는 것이 중요합니다.
+          LLM 추론은 힘이 세지만 hallucination 위험이 있고, 확정성이 필요한 질문에는 부적합합니다.
+        </p>
+        <p>
+          Graphify는 일부러 LLM을 쓰지 않습니다 — AST는 컴파일러가 파싱한 결정적 결과이기 때문입니다.
+          Graphiti는 LLM을 <em>쓰되 추출 단계에만</em> 한정하며, 쿼리 시점엔 저장된 그래프를 결정적으로 순회합니다.
+          이 분리가 깨지면 시스템 전체의 신뢰도가 떨어집니다.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== 4. PROTOCOLS ============== -->
+<section id="protocols">
+  <div class="wrap">
+    <div class="sec-num reveal">§4 · 공학 규율</div>
+    <h2 class="sec-title reveal">SDP와 NLF: 지식을 정직하게 활용하기 위한 규율</h2>
+    <p class="sec-intro reveal">
+      GNGM이 "무엇을 아는가"를 담당한다면, SDP는 "어떻게 변경을 수행하는가"를,
+      NLF는 "무엇을 주장하지 않는가"를 담당합니다.
+      지식 스택만으로는 에이전트가 정직해지지 않습니다 — epistemic 규율이 함께 필요합니다.
+    </p>
+
+    <div class="proto-grid">
+      <!-- SDP -->
+      <div class="proto proto-sdp reveal">
+        <span class="proto-tag">SDP · Standard Development Protocol</span>
+        <h3>모든 코드 변경이 통과해야 할 5단계</h3>
+        <p class="proto-sub">
+          3줄짜리 버그 수정이라도 동일하게 적용. 각 단계의 목적은 서로 다른 오류 유형을 조기에 잡아내는 것.
+        </p>
+
+        <ol class="steps">
+          <li>
+            <strong>Brainstorm</strong>
+            <span>GNGM 4계층 병렬 조회 → 문맥 확보 → 계획 수립</span>
+          </li>
+          <li>
+            <strong>ECC Plan Review</strong>
+            <span>4개 리뷰 에이전트가 <em>코드 작성 전</em> 계획 검토 (correctness · blast radius · pattern consistency · completeness)</span>
+          </li>
+          <li>
+            <strong>Execute</strong>
+            <span>검토된 계획대로 구현. 계획 이탈 감지 시 중단하고 계획부터 갱신</span>
+          </li>
+          <li>
+            <strong>TDD Certificate</strong>
+            <span>변경마다 RED → GREEN 증거 확보. 수동 확인은 증거로 인정되지 않음</span>
+          </li>
+          <li>
+            <strong>ECC Code Review</strong>
+            <span>4개 전문 에이전트가 구현 검토 (SOLID · 단순성 · silent failure · 보안)</span>
+          </li>
+        </ol>
+
+        <p style="margin-top: 1.25rem; font-size: 0.88rem;">
+          핵심 원리: 오류는 빨리 발견할수록 수정 비용이 낮습니다. 계획 단계 오류는 코드 수정 전에, 코드 오류는 머지 전에 잡습니다.
+        </p>
+      </div>
+
+      <!-- NLF -->
+      <div class="proto proto-nlf reveal">
+        <span class="proto-tag">NLF · No Lie Fix</span>
+        <h3>거짓 수정과 검증 없는 주장의 금지</h3>
+        <p class="proto-sub">
+          사용자를 빨리 만족시키려는 조급함에서 발생하는 두 종류의 거짓말 — 땜빵 수정(fix bandage)과 확신 있는 미검증 주장(claim bandage) — 을 모두 금지합니다.
+        </p>
+
+        <h4 style="color: var(--warn); margin-top: 0;">금지되는 행동</h4>
+        <div class="forbidden">
+          <div class="forbid">
+            <strong>주석 처리 / 비활성화 / try-except로 삼키기</strong>
+            <span>증상을 감추되 근본 원인은 그대로 남김</span>
+          </div>
+          <div class="forbid">
+            <strong>검증 없는 구조 주장</strong>
+            <span>"X는 Y와 연결되어 있습니다" — 이번 세션에서 call chain을 trace하지 않은 채</span>
+          </div>
+          <div class="forbid">
+            <strong>grep 한 건으로 "없다" 단정</strong>
+            <span>한 파일 검색 0건 ≠ 호출 체인 전체 검증 0건</span>
+          </div>
+          <div class="forbid">
+            <strong>주석·문서·핸드오프를 ground truth로 취급</strong>
+            <span>코드와 주석이 다를 때 코드가 이김. 항상 코드로 재확인</span>
+          </div>
+        </div>
+
+        <div class="verify-criteria">
+          <span class="k">검증된 주장의 정의 (4가지 질문 통과)</span>
+          <ol>
+            <li>이번 세션에서 어떤 파일을 primary source로 읽었는가 (경로 + 라인 번호)</li>
+            <li>entry point부터 동작 지점까지 call chain을 trace했는가</li>
+            <li>주석/문서가 아닌 실제 코드를 확인했는가</li>
+            <li>grep 0건이라면 한 파일이 아닌 전체 체인을 검색했는가</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== 5. INTEGRATED WORKFLOW ============== -->
+<section id="workflow">
+  <div class="wrap">
+    <div class="sec-num reveal">§5 · 통합 워크플로우</div>
+    <h2 class="sec-title reveal">실제 버그 수정 작업의 단계별 흐름</h2>
+    <p class="sec-intro reveal">
+      사용자가 버그 수정을 요청했을 때 GNGM + SDP + NLF가 어떻게 함께 작동하는지 예시.
+      <code>GNGM</code>, <code>NLF</code> 같은 trigger phrase는 에이전트가 해당 규율을 명시적으로 활성화하는 키워드입니다.
+    </p>
+
+    <div class="workflow reveal">
+<span class="phase"># 1. Pre-task (GNGM 병렬 조회)</span>
+<span class="sub"><span class="a">graphiti.search</span>(<span class="c">"X 엔티티와 연결된 항목"</span>)   <span class="c"># 관계·의사결정 이력</span></span>
+<span class="sub"><span class="a">neuraltree.lesson_match</span>(<span class="c">[증상, 컴포넌트]</span>)   <span class="c"># 과거 동일 수정 유무</span></span>
+<span class="sub"><span class="a">viking.search</span>(<span class="c">"X 관련 문서"</span>)                   <span class="c"># 의미 기반 문서 검색</span></span>
+<span class="sub"><span class="a">memory.search_nodes</span>(<span class="c">"X 영역 사용자 선호"</span>)       <span class="c"># cross-session 규칙</span></span>
+<span class="sub"><span class="a">graphify.query</span>(<span class="c">"X를 호출하는 함수"</span>)          <span class="c"># 결정적 구조 쿼리</span></span>
+
+<span class="phase"># 2. SDP Step 1-2: 계획 수립 → 4 에이전트가 계획 검토</span>
+<span class="sub"><span class="c"># correctness / blast radius / pattern consistency / completeness</span></span>
+<span class="sub"><span class="c"># CRITICAL / WARNING 항목 전부 해결 후 진행</span></span>
+
+<span class="phase"># 3. <span class="h">NLF 체크</span> — 자가 진단</span>
+<span class="sub"><span class="c"># "주석 처리하면 해결된다"는 생각이 드는가? → 근본 원인 미파악</span></span>
+<span class="sub"><span class="c"># "X는 Y와 연결되어 있다"고 주장하려는가? → call chain 실제 trace 필요</span></span>
+
+<span class="phase"># 4. SDP Step 3-5: 구현 → TDD → 4 에이전트 코드 리뷰</span>
+<span class="sub"><span class="a">pytest</span> -k <span class="c">"새로 추가된 테스트"</span>   <span class="c"># RED → GREEN 증거</span></span>
+
+<span class="phase"># 5. Post-fix (GNGM 축적)</span>
+<span class="sub"><span class="a">neuraltree.lesson_add</span>(domain, {symptom, root_cause, fix, chain})</span>
+<span class="sub"><span class="a">graphiti.add_episode</span>(name, body=<span class="c">"... Connects: A → B → C ..."</span>)</span>
+<span class="sub"><span class="a">graphify.update</span>()   <span class="c"># post-commit hook이 자동 실행</span></span>
+<span class="sub"><span class="a">memory.add_observations</span>()   <span class="c"># 새 영속 규칙이 발견되었을 경우에만</span></span>
+
+<span class="phase"># 6. 증류 (조건 충족 시)</span>
+<span class="sub"><span class="c"># 해당 domain의 lesson이 3개 이상이 되었는가?</span></span>
+<span class="sub"><span class="a">neuraltree.compile</span>(topic=domain)   <span class="c"># LLM 합성으로 canonical wiki 생성</span></span>
+<span class="sub"><span class="a">neuraltree.viking_index</span>()          <span class="c"># 의미 검색 인덱스에 재투입</span></span>
+    </div>
+
+    <p style="margin-top: 2rem; font-size: 0.95rem;">
+      이 워크플로우의 순효과: <strong>세션 n+1이 세션 n의 모든 출력을 입력으로 받는다.</strong>
+      지식이 소실되지 않고 누적되며, 동일한 버그가 두 번 수동 분석되지 않습니다.
+      동시에 NLF가 검증 없는 주장을 차단하므로, 누적된 지식은 hallucination이 아닌 확인된 사실입니다.
+    </p>
+  </div>
+</section>
+
+<!-- ============== 6. SUMMARY ============== -->
+<section id="summary">
+  <div class="wrap">
+    <div class="sec-num reveal">§6 · 정리</div>
+    <h2 class="sec-title reveal">세 가지 요소가 서로를 떠받치는 구조</h2>
+
+    <div class="prose-block reveal">
+      <p>
+        <strong>GNGM</strong>은 "무엇을 아는가"의 문제를 해결합니다 — stateless LLM 에이전트에게 persistent, multi-representational 지식을 제공합니다.
+      </p>
+      <p>
+        <strong>SDP</strong>는 "어떻게 변경을 수행하는가"의 문제를 해결합니다 — 모든 코드 변경이 계획·검토·증거·재검토의 단계를 거치도록 강제합니다.
+      </p>
+      <p>
+        <strong>NLF</strong>는 "무엇을 주장하지 않는가"의 문제를 해결합니다 — 검증 없는 주장과 증상 덮기 식 수정을 epistemic 규율로 금지합니다.
+      </p>
+      <p>
+        셋 중 하나가 빠지면 다른 둘이 무력화됩니다. GNGM 없이 SDP/NLF만 있으면 매 세션이 맨손으로 시작합니다.
+        SDP 없이 GNGM/NLF만 있으면 축적된 지식이 무분별하게 활용됩니다.
+        NLF 없이 GNGM/SDP만 있으면 축적된 지식이 거짓 사실로 오염됩니다.
+        이 세 요소는 분리 가능한 모듈이 아니라 <strong>하나의 엔지니어링 시스템의 세 기둥</strong>입니다.
+      </p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div><span class="brand">GNGM · SDP · NLF</span> — AI 코딩 에이전트 지식 스택 및 공학 규율 기술 개요</div>
+    <div style="margin-top: 0.4rem; font-size: 0.78rem;">All components are local, open source, and language-agnostic.</div>
+  </div>
+</footer>
+
+<script>
+const io = new IntersectionObserver((entries) => {
+  entries.forEach((e) => {
+    if (e.isIntersecting) {
+      e.target.classList.add("in");
+      io.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1, rootMargin: "0px 0px -40px 0px" });
+
+document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+
+const nav = document.querySelector(".nav");
+const onScroll = () => nav.classList.toggle("scrolled", window.scrollY > 20);
+window.addEventListener("scroll", onScroll, { passive: true });
+onScroll();
+</script>
+
+</body>
+</html>
