@@ -111,14 +111,11 @@ Before any fix, stress-test with questions answered FROM THE CODEBASE, not from 
 
 If you can't answer one from the codebase, GNGM pre-task search the gap.
 
-#### Step 4 — Simulate (RIU — Reproduction Is Understanding)
-
-> **"If you can reproduce the error perfectly, you understand it perfectly. If you can reproduce the fix perfectly, you've proven the fix."** See [NLF § Reproduction Is Understanding](NLF.md#reproduction-is-understanding-riu).
+#### Step 4 — Simulate
 
 Write a Python script that PROVES the fix works before touching production code:
 
-- **Reproduce the error first** (against real production-shaped data, not mocks). If you can't make it fail on command, you don't understand it yet — stop and go deeper.
-- **Reproduce the fix second**: same script, now produces correct output. Old un-fixed branch still fails.
+- Reproduce the exact failure
 - Prove the fix handles: valid input, invalid input, expired state, edge cases
 - Run it — hard evidence, not theoretical reasoning
 

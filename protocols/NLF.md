@@ -118,43 +118,13 @@ The user caught it and called it out. NLF rule was codified from that moment.
 
 When you feel any of these, pause. State: "NLF check — I'm about to claim X without verification. Tracing now." Then trace with tool calls before speaking.
 
-## Reproduction Is Understanding (RIU)
-
-> **"If you can reproduce the error perfectly, you understand it perfectly. If you can reproduce the fix perfectly, you've proven the fix."**
-
-This is the verification counterpart to NLF. A bandage-fix is often betrayed by the fact that the author *never reproduced the bug in isolation* — they guessed from symptoms. RIU forbids that.
-
-### The two halves
-
-1. **Reproduce the error** — before proposing any fix, write a minimal script / test that triggers the exact failing behavior against real data. If you can't make it fail on command, you don't understand it yet. Stop and investigate more.
-2. **Reproduce the fix** — after the fix, run that same script / test. If it now produces the correct behavior AND the old script still fails on the un-fixed branch, you have hard proof. Not "I read the diff and it looks right." **Proof.**
-
-### Why this is above "write a test"
-
-A test can pass for wrong reasons (mocked the wrong thing, asserted on the wrong field, matched a coincidence). Reproducing the error against **real production-shaped data** — even once, in a throwaway script — forces you to confront the actual causal chain. Only then can you claim understanding.
-
-**If the reproduction is hard to build, that's a signal** — either the bug is more subtle than you think, or the code path is more tangled than you think. Either way, slow down.
-
-### Worked example (from 2026-04-24, vrsmanager)
-
-Symptom: 348 rows mislabeled as "StrOrigin Change" when the EventName didn't exist in PREVIOUS.
-
-Bad path (bandage-shaped): read the code, spot `SC fallback match`, patch it to check EventName explicitly. Ship.
-
-RIU path:
-1. **Reproduce the error** — Loaded real `PREVIOUS.xlsx` + `CURRENT.xlsx` the same way the production code does. Walked the 10-key algorithm manually. Proved that for 5/5 flagged rows, the match lands on `PREV idx=21172` via SC, and `row.get("EventName", "")` returns `""` for every PREVIOUS row because the column header is `Eventname` (lowercase n).
-2. **Identify the real cause** — case-sensitive column name mismatch at load time, not the SC algorithm.
-3. **Reproduce the fix** — after normalizing column names at load time, re-run the same reproduction script → all 5 rows now classify as "No Change" or "New Row" appropriately, SEO PASS 1 fast-path fires, 348 mislabels gone.
-
-Without the reproduction, the "obvious" fix would have patched the wrong layer.
-
 ## Verification
 
 ### Before claiming a fix is done
 
-1. **Can I reproduce the error deterministically?** (script/test + actual failure output, not just a theory)
-2. **What was the real cause?** (one-sentence explanation — consistent with the reproduction)
-3. **Can I reproduce the fix?** (same script, now correct output)
+1. **What was the real cause?** (one-sentence explanation)
+2. **What test would have caught it?** (name or concept)
+3. **Did I run that test?** (evidence)
 4. **Is there any code path that still has the symptom?** (grep for the pattern)
 
 If you can't answer all four, the fix isn't done — it's a claim.
