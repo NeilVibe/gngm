@@ -69,7 +69,13 @@ Ask hard questions answered FROM THE CODEBASE, not from memory:
 - What breaks if this fix is wrong?
 - Is there an existing pattern to mirror?
 
-### 1c. Write the plan
+### 1c. Reproduce the error (RIU — for bugs)
+
+> **"If you can reproduce the error perfectly, you understand it perfectly."** See [NLF § Reproduction Is Understanding](NLF.md#reproduction-is-understanding-riu).
+
+For bug fixes, before proposing a fix, build a minimal script that triggers the exact failure against real data. If you can't make it fail on command, you don't understand it yet — go deeper. The reproduction script becomes the RED test in Step 4.
+
+### 1d. Write the plan
 
 The plan MUST include:
 
