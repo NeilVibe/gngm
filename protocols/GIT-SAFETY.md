@@ -2,6 +2,8 @@
 
 > A single `git push --force` can annihilate someone's life work.
 > This protocol codifies the defenses. Learned the hard way, 2026-04-18.
+>
+> **Sibling protocol: [GIT-HYGIENE.md](GIT-HYGIENE.md).** GIT-SAFETY defends against catastrophes (force-push, silent restore, hard reset). GIT-HYGIENE codifies the daily commit/push discipline that means catastrophes have nothing to destroy. Both required — neither alone is enough.
 
 ## The incident that forged this protocol
 
