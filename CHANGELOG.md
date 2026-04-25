@@ -2,6 +2,32 @@
 
 All notable changes to GNGM (the portable knowledge stack protocol).
 
+## [0.5.0] — 2026-04-25 — Operational protocol cluster
+
+The original three protocols (NLF + SDP + TDD) covered the engineering loop. This release adds five more that cover the operational layer around it: pipeline methodology, debugging, logging, stress, and session close.
+
+### Added
+
+- **`protocols/RAC.md`** — Repeatable Action Chain. Universal methodology for any pipeline-shaped workflow (software OR non-software). 10 invariants, 5 layers, 7 failure modes, 12-field cross-domain gallery, 3 famous-failure case studies (Boeing 737 MAX MCAS, Theranos, GameStop clearing), 2 smallest-possible examples (monthly invoice send + fire-extinguisher inspection). Trigger: `RAC`.
+- **`protocols/DEBUG.md`** — Systematic debugging. Iron Law: no fixes without root-cause investigation. Phase 0 GNGM Pentology pre-flight. `capture.sh` evidence bundler. R1-R11 runbook ledger. WC-NNN case-study ledger. Triggers: `DEBUG`, `DEBUG R<n>`.
+- **`protocols/LOGGING.md`** — Backend + frontend logging standards. `x-trace-id` correlation-ID round-trip contract. Structured event naming (`event_name` snake_case, never sentence-text). PII rules. Audit-log vs operational-log separation. Trigger: `LOG`.
+- **`protocols/STRESS-TEST.md`** — 7-dimension stress discipline (concurrency, burst rate, reconnect churn, state exhaustion, memory leak, cascading failure, long-tail latency). Smart small-N pressure with falsifiable invariants + cost guards (NEVER full-throttle on paid APIs). Triggers: `STRESS`, `STRESS <feature>`.
+- **`protocols/NATURAL-STOP-HANDOFF.md`** — NSH. When work hits a natural stop (logical-unit complete + tree clean + tests green + clarity high), Claude proactively runs a 7-step session-close instead of waiting for the operator to dictate the post-flight checklist. Closes the off-machine-gap + discovery-rot + state-drift trio that bites every long session. Variants: `NSH dry`, `NSH no push`, `NSH minimal`. Trigger: `NSH`.
+
+### Updated
+
+- **`README.md`** — Engineering protocols section split into "Foundational (the original three)" and "Operational (added 0.5.0)". Repository structure tree updated to list all 9 protocols.
+
+### Field-tested
+
+All five protocols were authored and shaped during real winacard waves (4.6, 4.7, 5.1, 8, 8.5):
+
+- RAC — distilled while building the asset generation pipeline (4.7) and the live-inventory compliance chain (Wave 8).
+- DEBUG — formalized during Wave 8.5's debug+logging infrastructure work; WC-001 case study (duplicate `vite preview` processes) is the first ledger entry.
+- LOGGING — the correlation-ID contract was wired during Wave 8.5; every Wave 8 frontend+backend log call uses the format pinned here.
+- STRESS-TEST — surfaced after Wave 8 brainstorming about live-inventory race conditions; recommends adding burst-rate + SSE-flap + memory-leak tests before launch.
+- NATURAL-STOP-HANDOFF — first execution shipped Wave 8 c17 (verify) + this exact 0.5.0 release commit. The protocol is field-tested by being the very thing that pushed it.
+
 ## [0.4.0] — 2026-04-23 — Full project scaffolding
 
 Tools alone weren't enough. GNGM now ships a full project structure bootstrapper so projects can harness the knowledge stack from day 1 — no manual scaffolding, no hunting for what's missing.
