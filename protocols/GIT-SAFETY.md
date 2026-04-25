@@ -142,8 +142,91 @@ If discovering a force-push makes your heart race and hands shake, **that is app
 
 The worst recovery mistakes happen in the 5 minutes right after the panic peaks, when relief makes you sloppy.
 
-## Summary — the 10 rules
+## The second incident that forged rules 11-13
 
+On 2026-04-25, during a successful Phase G Wave G6 Task G.6.5 ship (4 commits dual-pushed clean), a coder subagent dispatched mid-task ran `git restore` (or `git checkout --`) on the working tree. This silently overwrote **8 files of pre-existing uncommitted user WIP**: 6 Svelte frontend files (viewport-clamp + wiring fixes), `.claude/scheduled_tasks.lock`, and 2 lesson edits. The user had explicitly noted these in the prior handoff as "leave alone."
+
+`git restore` and `git checkout -- <file>` operations on the working tree do NOT appear in the reflog. There was no warning, no panic moment, no "forced-update" notification. The loss only became visible when comparing the post-session `git status` to the pre-session `git status` and finding the modified-marker (`M`) files all gone — silently reverted to HEAD.
+
+Recovery exhausted: git fsck found no dangling blobs with the lost content. NeuralTree backup was 4 days stale. Cursor history was a year stale. No IDE-specific local-history dirs existed for the project. Gitea had only what was pushed (no WIP). **Permanent loss of ~6 hours of frontend WIP.**
+
+Forensic signature: 10 files with **identical mtime to the nanosecond** (`2026-04-25 16:08:44.531789065`) — a `git restore <multiple-files>` runs in a single syscall batch and writes them all simultaneously. If you ever see identical-nanosecond mtimes across files in your working tree, an agent / hook / tool used a multi-file working-tree-modifying git command.
+
+Force-push (rules 1-10) is the loud catastrophe. Working-tree restore is the silent one. Both warrant defenses.
+
+### 11. Agent briefs MUST forbid working-tree-modifying git ops on out-of-scope files
+
+When dispatching a coder / fixer / refactor agent, the brief MUST include this absolute rule:
+
+> **DO NOT run any of the following on files OUTSIDE your scope:**
+>   - `git restore <file>` / `git restore --staged --worktree <file>`
+>   - `git checkout -- <file>` / `git checkout HEAD <file>`
+>   - `git reset --hard` / `git reset HEAD --hard`
+>   - `git clean -fd` / `git clean -fdx`
+>   - `git stash drop` (unless YOU created the stash in this session)
+>
+> **If you encounter pre-existing uncommitted modifications, leave them EXACTLY as you found them.** Do not "clean up" the working tree. Do not run `git checkout` on a file you didn't intend to modify. Do not assume `git status` should be clean before/after your work.
+>
+> Your scope is the files explicitly named in your brief. Anything else is the user's WIP — sacred, off-limits, untouchable.
+
+The brief must also enumerate the EXACT files the agent is allowed to touch. Anything not in that list = out-of-scope = touchable only via Read.
+
+### 12. Always `git stash --include-untracked` before dispatching a working-tree-modifying agent
+
+Belt-and-suspenders defense. Even with rule 11 in the brief, an agent might still slip. **Pre-flight: stash everything.** Post-flight: pop.
+
+```bash
+# Wrapper script — invoke this BEFORE any coder agent dispatch
+git stash push --include-untracked --message "agent-autostash-$(date +%Y%m%d-%H%M%S)"
+PRE_STASH_REF=$(git rev-parse stash@{0})
+
+# ... dispatch agent here ...
+
+# Post-flight: restore the user's WIP
+git stash pop --quiet
+# If pop conflicts (agent committed something that touched the same file),
+# DO NOT auto-resolve — surface the conflict to the user.
+```
+
+**Why this works:** if the agent runs `git restore` mid-dispatch, it restores from HEAD (which doesn't have the WIP). After the agent returns, `git stash pop` re-applies the WIP on top of any agent commits. If the agent's commits conflict with the WIP, the user gets a normal merge-conflict to resolve — much better than silent loss.
+
+**Why some teams won't do this:** stash conflicts can be annoying. The annoying conflict IS the alarm — it tells you the agent touched something it shouldn't have. Without the stash, that alarm doesn't fire.
+
+Reference implementation: `scripts/agent_autostash.sh` ships with this protocol. See it for the full conflict-handling logic.
+
+### 13. Post-flight: verify working tree matches your pre-flight expectation
+
+After every agent return, **before** committing or moving on:
+
+```bash
+# Pre-flight: capture the state
+git status --short > /tmp/pre-agent-status.txt
+git ls-files --modified --others --exclude-standard | sort > /tmp/pre-agent-files.txt
+
+# ... dispatch agent ...
+
+# Post-flight: diff the state lists
+git status --short > /tmp/post-agent-status.txt
+git ls-files --modified --others --exclude-standard | sort > /tmp/post-agent-files.txt
+
+# What changed?
+diff /tmp/pre-agent-status.txt /tmp/post-agent-status.txt
+# Any line REMOVED from the post-list = a file that was modified pre-agent but is no longer modified post-agent.
+# That's a smoking gun — the agent reverted user WIP.
+diff /tmp/pre-agent-files.txt /tmp/post-agent-files.txt
+```
+
+If you see lines disappearing from the modified-files list (without a corresponding commit by the agent that included them), STOP. The agent reverted user WIP. Investigate before doing anything else. Check `git fsck --lost-found` immediately while the dangling blobs are still fresh in `.git/objects/`.
+
+**Identical-nanosecond mtimes are a forensic tell.** Run:
+```bash
+stat -c "%y %n" <suspect-files> | sort
+```
+If multiple files show the same nanosecond timestamp, a multi-file git op (likely `git restore <files>`) hit them. Match the timestamp to your reflog + Bash tool history to find the offending command.
+
+## Summary — the 13 rules
+
+### Force-push catastrophes (1-10)
 1. Never force-push to main as a "test"
 2. Pre-push hooks after git-lfs silently fail unless you fix stdin consumption
 3. Remotes are not backups — your local reflog is the primary safety net
@@ -154,6 +237,11 @@ The worst recovery mistakes happen in the 5 minutes right after the panic peaks,
 8. Investigate "forced-update" in fetch output — don't `git pull`
 9. Verify git state before trusting another agent/session's work
 10. Your panic is appropriate — don't let anyone rush you past it
+
+### Working-tree silent-loss (11-13, added 2026-04-25)
+11. Agent briefs MUST forbid `git restore` / `git checkout --` / `git reset` / `git clean` on out-of-scope files
+12. ALWAYS `git stash --include-untracked` before dispatching ANY coder agent (autostash + auto-pop)
+13. Post-flight: diff `git status --short` pre vs post-agent — disappearing modified-files = silent revert
 
 ## Related
 
