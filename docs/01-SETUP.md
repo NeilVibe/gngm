@@ -1,3 +1,10 @@
+---
+name: GNGM Setup — Prerequisites + Installation
+description: Sets up the four services (FalkorDB, Ollama+Qwen, Viking, NeuralTree MCP) + Memory MCP wiring for a fresh machine. Skip most if already set up for another project; jump to per-project bootstrap at bottom. Lighter alternative to 00-INSTALL-FROM-SCRATCH.md.
+type: gngm-doc
+last_verified: 2026-04-27
+---
+
 # GNGM Setup — Prerequisites + Installation
 
 This document covers setting up the four services + MCP integrations for a fresh machine. If your machine has already been set up for another project (e.g. LocalizationTools), you can skip most of this and go straight to the per-project bootstrap section at the bottom.

@@ -5,6 +5,15 @@
 #   - MEMORY.md (if present) is ≤ 100 lines
 #   - docs/current/ has ≤ 3 files
 #
+# Excluded by convention (these are conventional repo files where
+# YAML frontmatter is non-idiomatic):
+#   - README.md
+#   - CHANGELOG.md
+#   - LICENSE.md / LICENSE
+#   - SECURITY.md
+#   - CONTRIBUTING.md
+#   - CODE_OF_CONDUCT.md
+#
 # Usage: bash docs/GNGM/scripts/gngm-hygiene-check.sh
 #
 # Exit 0 = all green. Exit 1 = violations found.
@@ -18,6 +27,38 @@ RESET="\033[0m"
 
 violations=0
 
+# Files that are conventionally NOT subject to the frontmatter rule
+# (basename match — applies wherever the file lives in the tree)
+HYGIENE_EXCLUDE_BASENAMES=(
+    "README.md"
+    "CHANGELOG.md"
+    "LICENSE.md"
+    "SECURITY.md"
+    "CONTRIBUTING.md"
+    "CODE_OF_CONDUCT.md"
+)
+
+is_excluded() {
+    local base
+    base="$(basename "$1")"
+    for excl in "${HYGIENE_EXCLUDE_BASENAMES[@]}"; do
+        [ "$base" = "$excl" ] && return 0
+    done
+    return 1
+}
+
+# Safe count: returns just an integer (not multi-line "0\n0" from
+# the grep-c-returns-1 + ||-echo-0 antipattern that masked violations
+# pre-0.6.2). Always succeeds; always emits exactly one integer.
+count_matches() {
+    local pattern="$1"
+    local file="$2"
+    local n
+    n=$(grep -c -- "$pattern" "$file" 2>/dev/null) || n=0
+    # Strip any whitespace / trailing newlines just in case
+    printf '%d' "${n:-0}"
+}
+
 echo "=== GNGM Hygiene Check ==="
 echo ""
 
@@ -25,11 +66,15 @@ echo ""
 echo "[1/4] Frontmatter + ## Related + ## Docs"
 # Scan all .md in project, excluding GNGM install tree + venvs + git
 while IFS= read -r f; do
+    if is_excluded "$f"; then
+        continue
+    fi
+
     has_frontmatter=0
     head -1 "$f" 2>/dev/null | grep -q '^---$' && has_frontmatter=1
 
-    has_related=$(grep -c '^## Related' "$f" 2>/dev/null || echo 0)
-    has_docs=$(grep -c '^## Docs' "$f" 2>/dev/null || echo 0)
+    has_related=$(count_matches '^## Related' "$f")
+    has_docs=$(count_matches '^## Docs' "$f")
 
     missing=""
     [ "$has_frontmatter" -eq 0 ] && missing="$missing frontmatter"

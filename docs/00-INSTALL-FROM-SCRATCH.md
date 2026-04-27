@@ -1,3 +1,10 @@
+---
+name: GNGM Install from Scratch — Full Pipeline (8 phases)
+description: Comprehensive installation guide for setting up the complete GNGM knowledge stack on a fresh machine — Docker, Ollama, Qwen 3.5 9B, FalkorDB, Viking, NeuralTree MCP, Memory MCP, Graphiti client, Graphify venv, Claude Code wiring. Everything is open-source. Designed for end-to-end execution by Claude Code or a human.
+type: gngm-doc
+last_verified: 2026-04-27
+---
+
 # Install from scratch — full GNGM pipeline
 
 Comprehensive installation guide for setting up the complete GNGM stack on a fresh machine. Everything is open-source. The guide is designed so that Claude Code (or a human) can execute it end-to-end.
@@ -465,9 +472,17 @@ If all 8 checks pass, you're done. Start saying `GNGM` in Claude Code.
 
 ---
 
-## See also
+## Related
 
+- [01-SETUP.md](01-SETUP.md) — prerequisites + minimal setup variant
 - [02-PROTOCOL.md](02-PROTOCOL.md) — full protocol mechanics once installed
 - [03-CHEATSHEET.md](03-CHEATSHEET.md) — quick reference during work
 - [04-LESSONS.md](04-LESSONS.md) — 9 pitfalls + resilience patterns
+- [05-PROJECT-STRUCTURE.md](05-PROJECT-STRUCTURE.md) — canonical project tree
+
+## Docs
+
 - [../CHANGELOG.md](../CHANGELOG.md) — version history
+- [../README.md](../README.md) — repo overview + 14-protocol catalog
+- [../scripts/gngm-init.sh](../scripts/gngm-init.sh) — minimal alternative to this guide
+- [../scripts/gngm-update.sh](../scripts/gngm-update.sh) — non-destructive refresh once installed

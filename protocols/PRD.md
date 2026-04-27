@@ -218,3 +218,9 @@ The PRD document itself is typically **150-400 lines** of markdown. Less = under
 - [IMPROVE-ARCHITECTURE.md](IMPROVE-ARCHITECTURE.md) — Run on shallow modules in the PRD touch path before slicing into issues
 - [NLF.md](NLF.md) — Truth discipline (PRD claims are code-verified, not memory-asserted)
 - [NATURAL-STOP-HANDOFF.md](NATURAL-STOP-HANDOFF.md) — NSH preserves multi-session PRD interview state
+
+## Docs
+
+- `../docs/02-PROTOCOL.md` — GNGM 4-mode mechanics PRD Step 2 uses
+- `../docs/05-PROJECT-STRUCTURE.md` — where to save PRDs in the project tree
+- `../README.md` — protocol cluster overview (PRD lives in product / scoping cluster)

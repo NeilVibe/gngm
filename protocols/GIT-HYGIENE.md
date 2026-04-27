@@ -1,3 +1,12 @@
+---
+name: GIT-HYGIENE — Everyday Commit + Push Discipline
+description: Daily commit + push cadence (save → 30-min commit → end-of-session push → milestone squash + PR). WIP commits are normal and prolific. Working-tree-as-save-state is FORBIDDEN. The `M` flag is a comparison marker, NOT a save state. Sibling to GIT-SAFETY — that one defends against catastrophes; this one means catastrophes have nothing to destroy.
+type: gngm-protocol
+version: 1
+last_verified: 2026-04-27
+trigger: self-applied throughout every working session
+---
+
 # GIT-HYGIENE — Everyday Commit + Push Discipline
 
 > Sibling to [GIT-SAFETY.md](GIT-SAFETY.md). GIT-SAFETY defends against catastrophes (force-push, agent silent-restore). GIT-HYGIENE is the daily discipline that means catastrophes have nothing to destroy.
@@ -224,12 +233,18 @@ Order of recovery attempts (most likely to succeed → least):
 
 If recovery fails, the lesson is: **the cost of one commit (5 seconds) is dramatically less than the cost of recovery (hours to days).** Make commit cheap and frequent.
 
-## Cross-references
+## Related
 
 - [GIT-SAFETY.md](GIT-SAFETY.md) — catastrophe defenses (force-push, agent silent-restore). GIT-HYGIENE prevents the daily losses; GIT-SAFETY prevents the rare big losses. Both required.
 - [NLF.md](NLF.md) — No Lie Fix. "I'll commit later" is a lie to yourself about intent. Commit now or accept the loss.
 - [SDP.md](SDP.md) — Standard Development Protocol. Every SDP step (Brainstorm, Plan, Execute, Review) is a natural commit boundary.
 - [TDD.md](TDD.md) — TDD's RED-GREEN-REFACTOR pattern is naturally three atomic commits.
+- [NATURAL-STOP-HANDOFF.md](NATURAL-STOP-HANDOFF.md) — NSH formalizes the end-of-session push rule.
+
+## Docs
+
+- `../docs/04-LESSONS.md` — pitfalls including WIP-loss patterns
+- `../scripts/gngm-init.sh` — installs the stdin-safe pre-push hook
 
 ## Summary — the 10 rules + cadence
 

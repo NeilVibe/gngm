@@ -2,6 +2,71 @@
 
 All notable changes to GNGM (the portable knowledge stack protocol).
 
+## [0.6.2] — 2026-04-27 — Hygiene closure (script bug fix + frontmatter sweep)
+
+`bash scripts/gngm-hygiene-check.sh` now returns ✅ all green. Closes a structural-discipline gap that 0.6.0 + 0.6.1 added new protocols around but didn't audit the existing baseline against.
+
+### Fixed
+
+- **`scripts/gngm-hygiene-check.sh`** — `grep -c` bug. `grep -c` returns exit code 1 when a pattern matches 0 times, while ALSO printing `0` to stdout. The old `var=$(grep -c ... || echo 0)` then concatenated stdout `0` + fallback `echo 0` into a multi-line string `"0\n0"`. The downstream `[ "$var" -eq 0 ]` test silently failed under `set -u` (no integer match), so missing `## Related` / `## Docs` sections were never reported. Real violations were 17 across the repo while the script reported only 14 (frontmatter-only). Replaced with a dedicated `count_matches()` helper that always emits a single integer.
+
+### Added (script)
+
+- **`scripts/gngm-hygiene-check.sh`** — `HYGIENE_EXCLUDE_BASENAMES` list. README.md, CHANGELOG.md, LICENSE.md, SECURITY.md, CONTRIBUTING.md, CODE_OF_CONDUCT.md are excluded from the frontmatter rule. These are conventional repo files where YAML frontmatter is non-idiomatic (GitHub renders the YAML block instead of treating it as metadata). Honest exclusion beats fake compliance.
+
+### Added (frontmatter to 12 files)
+
+12 files gained frontmatter so `head -1` returns `---`:
+
+- `protocols/SDP.md` + `## Docs`
+- `protocols/TDD.md` + `## Docs`
+- `protocols/GIT-SAFETY.md` + `## Docs`
+- `protocols/GIT-HYGIENE.md` + `## Related` + `## Docs` (the cross-references existed inline; promoted into proper sections)
+- `protocols/STRESS-TEST.md` (already had Related + Docs)
+- `docs/00-INSTALL-FROM-SCRATCH.md` + `## Related` (renamed from "See also") + `## Docs`
+- `docs/01-SETUP.md` (already had Related + Docs)
+- `docs/02-PROTOCOL.md` + `## Related` + `## Docs` (no See also to rename)
+- `docs/03-CHEATSHEET.md` + `## Related` (renamed) + `## Docs`
+- `docs/04-LESSONS.md` + `## Related` (renamed) + `## Docs`
+- `docs/05-PROJECT-STRUCTURE.md` (already had Related + Docs)
+- `docs/06-WAVE-PROTOCOL.md` (already had Related + Docs)
+
+### Added (## Docs sections to 5 protocols I authored without them)
+
+The 0.6.0 + 0.6.1 protocols I added had `## Related` but consistently missed `## Docs`. Caught by the now-fixed hygiene script:
+
+- `protocols/NLF.md` — added `## Related` + `## Docs` (had neither — narrative-style original)
+- `protocols/PRD.md` — added `## Docs`
+- `protocols/PRD-TO-ISSUES.md` — added `## Docs`
+- `protocols/UBIQUITOUS-LANGUAGE.md` — added `## Docs`
+- `protocols/IMPROVE-ARCHITECTURE.md` — added `## Docs` (replaced trailing Ousterhout reference inside it)
+
+### Why this release matters
+
+The hygiene script existed but under-reported. Self-discipline only works if the tool measuring it tells the truth. 0.6.2 makes the tool honest, then makes the repo conform to what the honest tool says. NLF discipline applied to ourselves: we don't pretend the hygiene rule applies to README.md (it doesn't, conventionally) and we don't pretend our protocol files were fully compliant when they weren't.
+
+### Verification
+
+```bash
+$ bash scripts/gngm-hygiene-check.sh
+=== GNGM Hygiene Check ===
+
+[1/4] Frontmatter + ## Related + ## Docs
+  ✓ all .md files have frontmatter + ## Related + ## Docs
+
+[2/4] MEMORY.md ≤ 100 lines
+  — MEMORY.md not present (Claude-Code-only feature, OK to skip)
+
+[3/4] docs/current/ ≤ 3 files
+  — docs/current/ not present
+
+[4/4] lessons/ structure sanity
+  ✓ lessons/ structure OK
+
+=== Summary ===
+All hygiene checks passed ✓
+```
+
 ## [0.6.1] — 2026-04-27 — Discoverability + update path
 
 Tightens the 0.6.0 release so already-installed projects can pick up the new product/scoping protocols cleanly, and so the new triggers are discoverable from the README without hunting through frontmatter.

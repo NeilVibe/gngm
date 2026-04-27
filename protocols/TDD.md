@@ -1,3 +1,12 @@
+---
+name: TDD — Test-Driven Development + First-Debug Protocol
+description: Two complementary disciplines. TDD baseline (RED → GREEN per change) for normal feature work; TDD-First Debug Protocol (heavy 6-step variant — read logs → trace → grill → simulate → RED tests → plan with exact code) for production bugs from logs, auth/security bugs, or cross-component bugs where blast radius matters.
+type: gngm-protocol
+version: 1
+last_verified: 2026-04-27
+trigger: TDD (baseline) OR DEBUG R<n> (heavy variant routed via DEBUG protocol)
+---
+
 # TDD — Test-Driven Development + First-Debug Protocol
 
 Two complementary patterns in one doc:
@@ -189,4 +198,11 @@ Actual numbers from one production bug solved with this protocol:
 
 - [SDP.md](SDP.md) — Standard Development Protocol. SDP Step 4 uses TDD baseline. SDP Step 1 + NeuralTree lesson_match can detect "this is a heavy-debug scenario."
 - [NLF.md](NLF.md) — No Lie Fix. TDD proves the fix; NLF forbids the bandage.
-- GNGM `02-PROTOCOL.md` Step 3.4 — NeuralTree lesson_match returns past fixes by symptom; run first before writing anything.
+- [DEBUG.md](DEBUG.md) — Heavy variant routes through DEBUG R<n> runbook ledger.
+- [STRESS-TEST.md](STRESS-TEST.md) — RED-GREEN must fire before stress.
+
+## Docs
+
+- `../docs/02-PROTOCOL.md` Step 3.4 — NeuralTree lesson_match returns past fixes by symptom; run first before writing anything
+- `../docs/03-CHEATSHEET.md` — quick reference for TDD baseline cycle
+- `../docs/04-LESSONS.md` — production pitfalls including TDD-related anti-patterns

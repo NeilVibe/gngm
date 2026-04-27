@@ -1,3 +1,12 @@
+---
+name: SDP — Standard Development Protocol
+description: Baseline 5-step protocol for ALL code changes (bug fixes, features, refactors). Brainstorm → ECC Plan Review → Execute → TDD Certificate → ECC Code Review, with a LEARN step closing the GNGM feedback loop. Layer PRXR on top for major multi-file features.
+type: gngm-protocol
+version: 1
+last_verified: 2026-04-27
+trigger: SDP (explicit) OR self-applied to any code change
+---
+
 # SDP — Standard Development Protocol
 
 > **The baseline protocol for ALL code changes.** No exceptions — bug fixes, features, refactors.
@@ -339,4 +348,13 @@ AFTER: LEARN
 
 - [NLF.md](NLF.md) — No Lie Fix. SDP finds root causes; NLF forbids bandages around them.
 - [TDD.md](TDD.md) — TDD-First Debug Protocol. Heavier variant of Step 4 for production bugs.
-- GNGM `02-PROTOCOL.md` — the knowledge stack mechanics SDP Step 1 uses.
+- [PRD.md](PRD.md) — Product Requirements Document. Run BEFORE SDP for non-trivial new features.
+- [PRD-TO-ISSUES.md](PRD-TO-ISSUES.md) — Each decomposed issue feeds exactly one SDP loop.
+- [IMPROVE-ARCHITECTURE.md](IMPROVE-ARCHITECTURE.md) — If touch path is shallow, deepen it before SDP.
+- [NATURAL-STOP-HANDOFF.md](NATURAL-STOP-HANDOFF.md) — NSH is SDP step 7's session-close form.
+
+## Docs
+
+- `../docs/02-PROTOCOL.md` — full GNGM 4-mode mechanics that SDP Step 1 uses
+- `../docs/03-CHEATSHEET.md` — one-page reference
+- `../docs/04-LESSONS.md` — pitfalls + resilience patterns from production use

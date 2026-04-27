@@ -280,5 +280,10 @@ If Step 5 sub-agents take longer than 5 minutes each, the brief was probably too
 - [DEBUG.md](DEBUG.md) — Debug case studies often reveal IA candidates
 - [UBIQUITOUS-LANGUAGE.md](UBIQUITOUS-LANGUAGE.md) — Module / interface names use canonical vocabulary
 - [NLF.md](NLF.md) — Truth discipline (claims about coupling are code-verified)
-- [GNGM] (`docs/02-PROTOCOL.md` in the GNGM root) — knowledge-stack mechanics IA Step 1 uses
+
+## Docs
+
+- `../docs/02-PROTOCOL.md` — knowledge-stack mechanics IA Step 1 uses
+- `../docs/04-LESSONS.md` — production cases of shallow-module drift
+- `../README.md` — protocol cluster overview
 - Ousterhout, "A Philosophy of Software Design" — the deep-module thesis underlying this protocol

@@ -209,3 +209,9 @@ If you find yourself drafting a slice and reaching for "Phase 1" / "Phase 2" sub
 - [NLF.md](NLF.md) — Truth discipline
 - [NATURAL-STOP-HANDOFF.md](NATURAL-STOP-HANDOFF.md) — Multi-session decomposition handoff
 - [GIT-HYGIENE.md](GIT-HYGIENE.md) — Commit cadence for the eventual implementation
+
+## Docs
+
+- `../docs/02-PROTOCOL.md` — GNGM 4-mode mechanics decomposition Step 2 uses
+- `../docs/06-WAVE-PROTOCOL.md` — wave lifecycle that issues feed into
+- `../README.md` — protocol cluster overview

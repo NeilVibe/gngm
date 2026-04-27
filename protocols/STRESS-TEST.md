@@ -1,3 +1,12 @@
+---
+name: STRESS-TEST — Cleverly Hunting Breaks Under Load
+description: 7-dimension stress discipline (concurrency, burst rate, reconnect churn, state exhaustion, memory leak, cascading failure, long-tail latency). Smart small-N pressure with falsifiable invariants + cost guards. NEVER full-throttle on paid APIs. Find breaks before production users do, without burning the laptop or the budget.
+type: gngm-protocol
+version: 1
+last_verified: 2026-04-27
+trigger: STRESS (general) OR STRESS <feature> (scoped) OR STRESS audit / STRESS pre-launch (sweep modes)
+---
+
 # STRESS-TEST — Cleverly Hunting Breaks Under Load
 
 > **Trigger:** `STRESS` or `STRESS <feature>`. Activates this protocol on the named feature/path.

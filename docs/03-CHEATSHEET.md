@@ -1,3 +1,10 @@
+---
+name: GNGM Cheatsheet — Quick Reference
+description: One-page pinnable reference for the full GNGM 4-tool protocol — trigger phrases, pre-task / post-fix / organizational checklists, health check, tool recipes for Graphiti / NeuralTree / Viking / Memory.
+type: gngm-doc
+last_verified: 2026-04-27
+---
+
 # GNGM Cheatsheet — Quick Reference
 
 Pin this tab. One-page reference for the full protocol.
@@ -187,9 +194,16 @@ memory.create_relations([{from, to, relationType}])
 - **[../protocols/SDP.md](../protocols/SDP.md)** — Standard Development Protocol (baseline for all code changes). 5 steps: Brainstorm → ECC Plan Review → Execute → TDD Certificate → ECC Code Review.
 - **[../protocols/TDD.md](../protocols/TDD.md)** — TDD baseline + First-Debug Protocol (6-step heavy variant for production bug fixes from logs).
 
-## See also
+## Related
 
-- [02-PROTOCOL.md](02-PROTOCOL.md) — full mechanics
-- [04-LESSONS.md](04-LESSONS.md) — 9 pitfalls
-- [01-SETUP.md](01-SETUP.md) — prerequisites
-- [00-INSTALL-FROM-SCRATCH.md](00-INSTALL-FROM-SCRATCH.md) — full install guide
+- [02-PROTOCOL.md](02-PROTOCOL.md) — full mechanics this cheatsheet condenses
+- [04-LESSONS.md](04-LESSONS.md) — production pitfalls + resilience patterns
+- [01-SETUP.md](01-SETUP.md) — prerequisites for the 4 tools
+- [00-INSTALL-FROM-SCRATCH.md](00-INSTALL-FROM-SCRATCH.md) — comprehensive install guide
+- [06-WAVE-PROTOCOL.md](06-WAVE-PROTOCOL.md) — wave lifecycle that uses these checklists per stage
+
+## Docs
+
+- [../scripts/gngm-health.sh](../scripts/gngm-health.sh) — 10-second health check
+- [../README.md](../README.md) — repo overview + 14-protocol catalog
+- [../protocols/](../protocols/) — engineering protocols cluster (NLF, SDP, TDD, etc.)

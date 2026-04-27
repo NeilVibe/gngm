@@ -1,3 +1,10 @@
+---
+name: GNGM Lessons — Pitfalls + Resilience Patterns
+description: Eleven production failure modes surfaced while building and operating GNGM across LocalizationTools, newfin, vrsmanager, and winacard. Read once, internalize — they apply universally. The package grows organically; no gold-plating.
+type: gngm-doc
+last_verified: 2026-04-27
+---
+
 # GNGM Lessons — Pitfalls + Resilience Patterns
 
 Eleven production failure modes surfaced while building and operating GNGM across related projects (LocalizationTools, newfin, vrsmanager, winacard). Read once, internalize — they apply universally.
@@ -312,8 +319,18 @@ This file starts empty of newfin-specific lessons. As you work:
 
 The package grows organically. No gold-plating.
 
-## See also
+## Related
 
 - [02-PROTOCOL.md](02-PROTOCOL.md) — the full protocol
 - [03-CHEATSHEET.md](03-CHEATSHEET.md) — one-page reference
 - [01-SETUP.md](01-SETUP.md) — prerequisites
+- [00-INSTALL-FROM-SCRATCH.md](00-INSTALL-FROM-SCRATCH.md) — comprehensive install guide
+- [05-PROJECT-STRUCTURE.md](05-PROJECT-STRUCTURE.md) — file organization that prevents some lessons
+- [06-WAVE-PROTOCOL.md](06-WAVE-PROTOCOL.md) — wave lifecycle that internalizes these lessons
+
+## Docs
+
+- [../README.md](../README.md) — repo overview
+- [../CHANGELOG.md](../CHANGELOG.md) — version history (lessons often inspire new releases)
+- [../protocols/NLF.md](../protocols/NLF.md) — No Lie Fix (the meta-lesson)
+- [../protocols/DEBUG.md](../protocols/DEBUG.md) — Iron Law (lesson #N: investigate before fixing)

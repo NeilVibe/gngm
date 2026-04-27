@@ -1,3 +1,10 @@
+---
+name: GNGM Project Structure — Harnessing the Full Power of GNGM
+description: GNGM is only half the story; the other half is the project structure the knowledge stack lives inside. Canonical project tree, adaptation patterns for any language/stack, multi-CLI support (CLAUDE.md / AGENTS.md / GEMINI.md), and the rules that make the structure compound rather than rot.
+type: gngm-doc
+last_verified: 2026-04-27
+---
+
 # Project Structure — Harnessing the Full Power of GNGM
 
 > GNGM is only half the story. The other half is the **project structure** the knowledge stack is embedded into. This doc describes the canonical structure, why it exists, and how to adapt it to any project or CLI AI.

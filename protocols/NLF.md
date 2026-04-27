@@ -169,3 +169,16 @@ Extended 2026-04-18 after a second incident where Claude made three confident ar
 Both forms — fix bandages and claim bandages — share the same root cause: **optimizing for short-term user mood over long-term correctness**. Both are FORBIDDEN.
 
 This rule applies universally across projects; no project-specific context required to follow it.
+
+## Related
+
+- [SDP.md](SDP.md) — Standard Development Protocol (NLF is the truth discipline running underneath every SDP step)
+- [TDD.md](TDD.md) — TDD certificates are how NLF claims become provable
+- [DEBUG.md](DEBUG.md) — Debug runbooks enforce NLF (Iron Law: no fixes without root-cause investigation)
+- [GIT-SAFETY.md](GIT-SAFETY.md) — NLF applies to git recovery too (don't pretend a `git reset --hard` was harmless)
+
+## Docs
+
+- `../docs/02-PROTOCOL.md` — full GNGM 4-mode mechanics; NLF is the meta-rule on top
+- `../docs/04-LESSONS.md` — production cases where NLF violations caused incidents
+- `../README.md` — protocol cluster overview

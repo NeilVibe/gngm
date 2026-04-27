@@ -1,3 +1,10 @@
+---
+name: GNGM Protocol — Full Mechanics
+description: The canonical 4-mode protocol that fires when "GNGM" is said in chat. Modes — Pre-task (search before doing), Post-fix (feed what you learned), Organizational (cleanup/audit), Health (10-second status). Each mode walks the four tools (Graphiti + NeuralTree + Viking + MemoryMCP) so no blind spot.
+type: gngm-doc
+last_verified: 2026-04-27
+---
+
 # GNGM Protocol — Full Mechanics
 
 This is the canonical protocol. When you or Claude say "GNGM" in a chat, this is what fires.
@@ -355,8 +362,17 @@ The four tools overlap BY DESIGN. Overlap lets:
 
 **Using one tool alone = blind spot.** GNGM forces the four-way pass.
 
-## See also
+## Related
 
+- [01-SETUP.md](01-SETUP.md) — prerequisites for the 4 tools
 - [03-CHEATSHEET.md](03-CHEATSHEET.md) — one-page quick reference
-- [04-LESSONS.md](04-LESSONS.md) — 8 pitfalls + resilience patterns
-- [scripts/gngm-health.sh](scripts/gngm-health.sh) — 10-second health check
+- [04-LESSONS.md](04-LESSONS.md) — production pitfalls + resilience patterns
+- [05-PROJECT-STRUCTURE.md](05-PROJECT-STRUCTURE.md) — where GNGM artifacts live in the project tree
+- [06-WAVE-PROTOCOL.md](06-WAVE-PROTOCOL.md) — wave lifecycle that uses GNGM at every stage
+
+## Docs
+
+- [../scripts/gngm-health.sh](../scripts/gngm-health.sh) — 10-second 4-tool health check
+- [../scripts/gngm-update.sh](../scripts/gngm-update.sh) — non-destructive refresh
+- [../README.md](../README.md) — repo overview + 14-protocol catalog
+- [../protocols/](../protocols/) — engineering disciplines that USE this protocol

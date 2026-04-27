@@ -1,3 +1,12 @@
+---
+name: GIT-SAFETY — Do Not Destroy Git History
+description: Forbidden destructive operations + atomic-commit discipline + no-amend rule + no-skip-hooks rule + agent working-tree silent-loss defense (rules 11-13). Self-applied on every git invocation. Sibling discipline to GIT-HYGIENE (everyday cadence) — GIT-SAFETY is the "what NOT to do," GIT-HYGIENE is the "what to do daily."
+type: gngm-protocol
+version: 1
+last_verified: 2026-04-27
+trigger: self-applied to every git invocation; AGENT-GIT-SAFETY (rules 11-13) before ANY coder/fixer/refactor agent dispatch
+---
+
 # GIT-SAFETY — Do Not Destroy Git History
 
 > A single `git push --force` can annihilate someone's life work.
@@ -249,5 +258,11 @@ If multiple files show the same nanosecond timestamp, a multi-file git op (likel
 
 - [NLF.md](NLF.md) — No Lie Fix (lie-fixes and bandages forbidden — this applies to git recovery too)
 - [SDP.md](SDP.md) — Standard Development Protocol
-- GNGM `04-LESSONS.md` — 9 pitfalls + resilience patterns
-- `scripts/gngm-init.sh` — installs the stdin-safe pre-push hook referenced here
+- [GIT-HYGIENE.md](GIT-HYGIENE.md) — sibling discipline (everyday cadence vs destructive-op defenses)
+- [DEBUG.md](DEBUG.md) — when something already broke, debug before reaching for `git reflog`
+
+## Docs
+
+- `../docs/04-LESSONS.md` — 9 pitfalls + resilience patterns
+- `../scripts/gngm-init.sh` — installs the stdin-safe pre-push hook referenced here
+- `../scripts/gngm-update.sh` — non-destructive refresh (does not touch project files)

@@ -1,3 +1,10 @@
+---
+name: GNGM Wave Protocol — Lifecycle of a Unit of Work
+description: How each unit of major work (a "wave" — equivalent to a phase, milestone, or feature) runs against the GNGM stack + canonical project structure. 7-stage lifecycle (OPEN → BRAINSTORM → PLAN REVIEW → EXECUTE → VERIFY → CODE REVIEW → CLOSE) using NLF/SDP/TDD discipline at each stage. Works for any stack, any CLI AI.
+type: gngm-doc
+last_verified: 2026-04-27
+---
+
 # Wave Protocol — Lifecycle of a Unit of Work
 
 > How each unit of major work (a "wave" — equivalent to a phase, milestone, or feature) runs against the GNGM stack + canonical project structure. Works for any stack, any CLI AI.

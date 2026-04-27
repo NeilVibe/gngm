@@ -227,3 +227,9 @@ UL run takes **3-10 minutes** of operator-visible work. Quick refreshes (re-runs
 - [NATURAL-STOP-HANDOFF.md](NATURAL-STOP-HANDOFF.md) — Auto-suggests UL refresh during session close
 - [NLF.md](NLF.md) — Truth discipline applies to glossary claims about current usage
 - [IMPROVE-ARCHITECTURE.md](IMPROVE-ARCHITECTURE.md) — Module names should follow canonical vocabulary
+
+## Docs
+
+- `../docs/02-PROTOCOL.md` — GNGM 4-mode mechanics; UL output is itself a knowledge artifact
+- `../docs/05-PROJECT-STRUCTURE.md` — UBIQUITOUS_LANGUAGE.md lives at project root
+- `../README.md` — protocol cluster overview
