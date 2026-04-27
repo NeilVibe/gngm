@@ -31,7 +31,7 @@ Tightens the 0.6.0 release so already-installed projects can pick up the new pro
 0.6.1 fixes all three. After this release:
 
 - Already-installed projects: `bash docs/GNGM/scripts/gngm-update.sh` → picks up everything new
-- New scaffolds: templates list all 13 protocols + reference the canonical README
+- New scaffolds: templates list all 14 protocols + reference the canonical README
 - Discoverability: `README.md` shows all 11 triggers in one place
 
 ### Migration
@@ -66,7 +66,7 @@ The 0.5.0 release added operational protocols (RAC + DEBUG + LOGGING + STRESS + 
 
 - **`protocols/NATURAL-STOP-HANDOFF.md`** — Step 3.5 added: glossary refresh check (UBIQUITOUS-LANGUAGE hook). Auto-suggests UL run if the glossary is stale or new domain terms surfaced this session. Operator can accept (`yes`), defer (`no`), or suppress for the rest of the session (`skip`). Skipped entirely under `NSH minimal`. NSH Relationship table + Related section also extended to reference PRD / PRD-TO-ISSUES / IMPROVE-ARCHITECTURE for multi-session continuity.
 
-- **`README.md`** — Engineering protocols section restructured into three clusters: Foundational (NLF + SDP + TDD), Operational (added 0.5.0), and Product / scoping (added 0.6.0). Repository structure tree updated to list all 13 protocols (also adds GIT-HYGIENE which was missing from the prior tree).
+- **`README.md`** — Engineering protocols section restructured into three clusters: Foundational (NLF + SDP + TDD), Operational, and Product / scoping (added 0.6.0). Repository structure tree updated to list all 14 protocols (also adds GIT-HYGIENE which was missing from the prior tree).
 
 - **`CHANGELOG.md`** — This entry.
 

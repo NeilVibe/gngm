@@ -163,14 +163,17 @@ GNGM is the knowledge stack. These are the engineering disciplines that use it:
 - **[protocols/SDP.md](protocols/SDP.md)** — **Standard Development Protocol.** Baseline for ALL code changes: Brainstorm → ECC Plan Review → Execute → TDD Certificate → ECC Code Review → Learn.
 - **[protocols/TDD.md](protocols/TDD.md)** — **TDD baseline + First-Debug Protocol (heavy).** RED → GREEN per change; for production bugs, the 6-step discipline (read logs → trace → grill → simulate → RED tests → plan with exact code).
 
-**Operational (added 0.5.0):**
+**Operational:**
 
 - **[protocols/GIT-SAFETY.md](protocols/GIT-SAFETY.md)** — **Git safety rules.** Forbidden destructive operations, atomic-commit discipline, no-amend rule, no-skip-hooks rule. Self-applied on every git invocation.
+- **[protocols/GIT-HYGIENE.md](protocols/GIT-HYGIENE.md)** — **Everyday commit + push cadence.** Save → 30-min commit → end-of-session push → milestone squash + PR. Working-tree-as-save-state is forbidden. Sibling discipline to GIT-SAFETY.
 - **[protocols/RAC.md](protocols/RAC.md)** — **Repeatable Action Chain.** Universal methodology for pipeline-shaped workflows: 10 invariants, 5 layers, 7 failure modes, cross-domain transfer pattern. Trigger: `RAC`. Applies to software AND non-software (drug trials, manufacturing QC, audit chains).
 - **[protocols/DEBUG.md](protocols/DEBUG.md)** — **Systematic debugging.** Iron Law (no fixes without root-cause investigation), Phase 0 GNGM Pentology, capture.sh evidence bundler, R1-R11 runbook ledger, WC-NNN case studies. Triggers: `DEBUG`, `DEBUG R<n>`.
 - **[protocols/LOGGING.md](protocols/LOGGING.md)** — **Logging standards.** Backend + frontend log format, correlation-ID contract (`x-trace-id` round-trip), structured event naming, PII rules, audit-log separation. Trigger: `LOG`.
 - **[protocols/STRESS-TEST.md](protocols/STRESS-TEST.md)** — **Stress-test discipline.** 7 dimensions (concurrency, burst rate, reconnect churn, state exhaustion, memory leak, cascading failure, long-tail latency). Smart small-N pressure with falsifiable invariants + cost guards. Triggers: `STRESS`, `STRESS <feature>`.
 - **[protocols/NATURAL-STOP-HANDOFF.md](protocols/NATURAL-STOP-HANDOFF.md)** — **NSH.** When work hits a clean natural stop (logical-unit complete + tree clean + tests green + clarity high), Claude proactively runs the 7-step session-close: verify → tests → GNGM sweep → push work → write detailed handoff → update active state → commit + push handoff → signal `/clear`-ready. Variants: `NSH dry`, `NSH no push`, `NSH minimal`. Closes the off-machine-gap + discovery-rot + state-drift trio that bites every long session.
+
+(GIT-SAFETY + GIT-HYGIENE predate the 0.5.0 cluster; RAC + DEBUG + LOGGING + STRESS-TEST + NATURAL-STOP-HANDOFF were the 0.5.0 release group.)
 
 **Product / scoping cluster (added 0.6.0):**
 
@@ -179,7 +182,7 @@ GNGM is the knowledge stack. These are the engineering disciplines that use it:
 - **[protocols/UBIQUITOUS-LANGUAGE.md](protocols/UBIQUITOUS-LANGUAGE.md)** — **Domain glossary protocol.** Extract a DDD-style glossary from conversation / PRD / codebase. Flags ambiguities (one word for many concepts, many words for one concept) and proposes canonical terms with aliases-to-avoid. Saves to `UBIQUITOUS_LANGUAGE.md`. Auto-suggested by NSH Step 3.5 when glossary is stale. Triggers: `UBIQUITOUS-LANGUAGE`, `UL`.
 - **[protocols/IMPROVE-ARCHITECTURE.md](protocols/IMPROVE-ARCHITECTURE.md)** — **Codebase architectural audit.** Explore organically (friction-as-signal, not rigid heuristics), surface deepening candidates per Ousterhout's deep-module thesis, spawn 3+ parallel sub-agents to design competing interfaces, ship an opinionated refactor RFC. Complements RAC at the L3 (Execution) layer where module shape determines testability + AI-navigability. Triggers: `IMPROVE-ARCHITECTURE`, `IA`.
 
-All thirteen are universal across projects; no project-specific context required.
+All fourteen are universal across projects; no project-specific context required.
 
 ## Repository structure
 

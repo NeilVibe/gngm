@@ -16,7 +16,7 @@ last_verified: {{DATE}}
 
 1. **Global rules** at `~/.claude/rules/` — knowledge-system, organization-master, power-stack, graphiti-protocol, neuraltree-protocol, cleanup-protocol, skill-tier-list
 2. **Memory trunk** auto-loaded from `~/.claude/projects/-<project-id>/memory/MEMORY.md` → branches into rules, active, reference
-3. **Project protocols** at `docs/GNGM/protocols/` — full set listed in `docs/GNGM/README.md` (foundational + operational + product/scoping clusters; 13 universal protocols as of 0.6.0)
+3. **Project protocols** at `docs/GNGM/protocols/` — full set listed in `docs/GNGM/README.md` (foundational + operational + product/scoping clusters; 14 universal protocols as of 0.6.1)
 4. **Master plan** at `MASTER_PLAN.md` if present — the roadmap
 
 ## Trigger phrases (act without asking)
