@@ -50,8 +50,8 @@ The scaffold script prompts which one(s) to create. They're equivalent — same 
 │   ├── INDEX.md                  (master doc index)
 │   ├── GNGM/                     (knowledge stack protocols — from install.sh)
 │   │   ├── docs/                 (00-INSTALL … 06-WAVE-PROTOCOL)
-│   │   ├── protocols/            (NLF, SDP, TDD, GIT-SAFETY)
-│   │   └── scripts/              (gngm-init, gngm-health, gngm-full-scaffold)
+│   │   ├── protocols/            (14 universal protocols — see GNGM/README.md for the full list grouped by cluster)
+│   │   └── scripts/              (gngm-init, gngm-health, gngm-full-scaffold, gngm-update)
 │   ├── current/                  (active handoffs — MAX 3 files)
 │   │   └── _INDEX.md
 │   ├── architecture/             (system design — populated as built)
