@@ -22,5 +22,5 @@ _(populate as rules are added — one file per domain, grouped by topic, not by 
 - `~/.claude/rules/` — global rules (auto-loaded)
 
 ## Docs
-- `<project>/docs/GNGM/protocols/` — NLF, SDP, TDD, GIT-SAFETY
+- `<project>/docs/GNGM/protocols/` — full set (foundational + operational + product/scoping; see `<project>/docs/GNGM/README.md` for canonical list)
 - `<project>/CLAUDE.md` — project-level auto-loaded instructions

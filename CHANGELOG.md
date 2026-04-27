@@ -2,6 +2,52 @@
 
 All notable changes to GNGM (the portable knowledge stack protocol).
 
+## [0.6.1] — 2026-04-27 — Discoverability + update path
+
+Tightens the 0.6.0 release so already-installed projects can pick up the new product/scoping protocols cleanly, and so the new triggers are discoverable from the README without hunting through frontmatter.
+
+### Added
+
+- **`scripts/gngm-update.sh`** — non-destructive refresh script for already-installed projects. Touches ONLY `<project>/docs/GNGM/{protocols,docs,scripts}/` — never project files (`CLAUDE.md`, `MEMORY.md`, project docs, lessons, source, etc.). Safe to re-run anytime. Also regenerates the thin `docs/GNGM/README.md` pointer so it stays current. Run via `bash docs/GNGM/scripts/gngm-update.sh` from inside an install OR `curl ... | bash -s -- /path/to/project` direct from upstream.
+
+### Updated
+
+- **`README.md`** — Added "Engineering protocol triggers" table next to the existing "Knowledge-stack triggers" table so all 11 trigger phrases (NLF, SDP, TDD/DEBUG, RAC, LOG, STRESS, NSH, PRD, PRD-TO-ISSUES, UL, IA) are discoverable in one scan. Added "Updating an already-installed GNGM" subsection documenting the gngm-update.sh path. Added gngm-update.sh row to the install-paths table and the repository-structure tree.
+
+- **`templates/CLAUDE.md.tpl`** — Trigger phrases table split into knowledge-stack vs engineering-protocol clusters (matches main README structure). Added all 11 protocol triggers (was 4). Discipline section gained PRD-first guidance (§3) and NSH session-close guidance (§5). Governance authority line generalized from "NLF, SDP, TDD, GIT-SAFETY" hard-coded list to "see docs/GNGM/README.md for canonical list" so future protocol additions don't require template edits.
+
+- **`templates/docs/protocols-_INDEX.md.tpl`** — Core protocols section expanded from 4 hard-coded entries to all 13, grouped by cluster (Foundational / Operational / Product+Scoping). Added cross-ref to canonical README.
+
+- **`templates/memory/rules-_INDEX.md.tpl`** — Generalized stale "NLF, SDP, TDD, GIT-SAFETY" reference to point at the canonical README.
+
+### Why this release matters
+
+0.6.0 shipped the four new protocols (PRD + PRD-TO-ISSUES + UL + IA), but downstream projects that already had GNGM installed had three friction points picking them up:
+
+1. No dedicated update path — `install.sh` works but prompts y/N to overwrite, and conflates "first install" with "refresh."
+2. Templates rotted with hard-coded 4-protocol lists, so newly-scaffolded projects didn't even see the new ones in their generated `CLAUDE.md` / `protocols/_INDEX.md`.
+3. The new triggers (`PRD`, `UL`, `IA`, `PRD-TO-ISSUES`) lived only in protocol frontmatter — invisible from the README scan.
+
+0.6.1 fixes all three. After this release:
+
+- Already-installed projects: `bash docs/GNGM/scripts/gngm-update.sh` → picks up everything new
+- New scaffolds: templates list all 13 protocols + reference the canonical README
+- Discoverability: `README.md` shows all 11 triggers in one place
+
+### Migration
+
+For projects on 0.5.0 or earlier installing 0.6.0+ for the first time, both options work:
+
+```bash
+# Option A — re-install (overwrites)
+curl -fsSL https://raw.githubusercontent.com/NeilVibe/gngm/main/install.sh | bash -s -- /path/to/project
+
+# Option B — update (non-destructive, only touches docs/GNGM/)
+curl -fsSL https://raw.githubusercontent.com/NeilVibe/gngm/main/scripts/gngm-update.sh | bash -s -- /path/to/project
+```
+
+Option B is the new recommended path for refreshing existing installs.
+
 ## [0.6.0] — 2026-04-27 — Product / scoping protocol cluster
 
 The 0.5.0 release added operational protocols (RAC + DEBUG + LOGGING + STRESS + NSH). This release closes the front-of-funnel gap: PRD creation, vertical-slice decomposition, domain glossary discipline, and proactive architectural audits. SDP previously assumed a spec already existed; with this release, the full chain runs PRD → PRD-TO-ISSUES → SDP (one loop per issue) → NSH.

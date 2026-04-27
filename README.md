@@ -45,6 +45,7 @@ bash scripts/install-services.sh
 | `install.sh` | Copies GNGM docs + protocols + scripts into `<project>/docs/GNGM/` | Minimal — just want the reference docs |
 | `gngm-init.sh` | Tools bootstrap: Graphify venv + hooks + Graphiti seed + health check | Just want the TOOLS |
 | **`gngm-full-scaffold.sh`** | **Full project structure: memory trunk + CLAUDE.md/AGENTS.md + docs tree + lessons + tools** | **Recommended — new projects OR grafting onto existing repos** |
+| `gngm-update.sh` | **Refresh an already-installed GNGM** (non-destructive — only touches `docs/GNGM/{protocols,docs,scripts}/`) | When upstream ships new protocols and you want to pick them up without reinstalling |
 
 ### Full scaffold (recommended, ~1 minute)
 
@@ -58,6 +59,27 @@ bash docs/GNGM/scripts/gngm-full-scaffold.sh
 ```
 
 The full scaffold is **idempotent** — safe to re-run, never clobbers existing files. It works in empty dirs AND existing repos (grafts GNGM on without touching your code).
+
+### Updating an already-installed GNGM (~10 seconds)
+
+Projects already running GNGM can pull the latest protocols + docs + scripts non-destructively at any time:
+
+```bash
+# Option A — from inside the installed project
+bash docs/GNGM/scripts/gngm-update.sh
+
+# Option B — direct from upstream (works even if your local copy is older than the script)
+curl -fsSL https://raw.githubusercontent.com/NeilVibe/gngm/main/scripts/gngm-update.sh | bash -s -- /path/to/your/project
+```
+
+`gngm-update.sh` ONLY touches `<project>/docs/GNGM/{protocols,docs,scripts}/`. It never touches:
+
+- `<project>/CLAUDE.md` / `MEMORY.md` / `MASTER_PLAN.md` (your project files)
+- `<project>/docs/` outside the GNGM subtree
+- `<project>/lessons/` / `memory/` / `src/` etc.
+- Any project-authored content
+
+After running, check the diff (`git diff --stat docs/GNGM/`) and commit (`chore(gngm): update to latest`). Pair with `bash docs/GNGM/scripts/gngm-health.sh` to verify all four services still respond.
 
 ### CLI AI support
 
@@ -102,6 +124,8 @@ Full setup: [docs/01-SETUP.md](docs/01-SETUP.md)
 
 ## Canonical trigger phrases (say in Claude Code chat)
 
+### Knowledge-stack triggers
+
 | You say | Mode | What happens |
 |---|---|---|
 | `GNGM` | full stack | Pre-task, post-fix, or cleanup depending on context |
@@ -110,6 +134,24 @@ Full setup: [docs/01-SETUP.md](docs/01-SETUP.md)
 | `GNGM cleanup` / `GNGM audit` | organizational | Saturation check + compile queue + orphan audit |
 | `GNGM health` / `GNGM status` | health | 10-second 4-tool green/red check |
 | `full GNGM` / `mega GNGM` | everything | Pre-task → work → post-fix → quick org pass |
+
+### Engineering protocol triggers
+
+| You say | Protocol | What happens |
+|---|---|---|
+| `NLF` | [NLF.md](protocols/NLF.md) | No-Lie-Fix discipline — every claim verified by tool call this session |
+| `SDP` | [SDP.md](protocols/SDP.md) | Brainstorm → Plan Review → Execute → TDD → Code Review → Learn |
+| `TDD` / `DEBUG R<n>` | [TDD.md](protocols/TDD.md) / [DEBUG.md](protocols/DEBUG.md) | Test-driven dev / runbook ledger debugging |
+| `RAC` | [RAC.md](protocols/RAC.md) | Repeatable Action Chain — universal pipeline methodology |
+| `LOG` | [LOGGING.md](protocols/LOGGING.md) | Structured logging + correlation-ID contract |
+| `STRESS` / `STRESS <feature>` | [STRESS-TEST.md](protocols/STRESS-TEST.md) | 7-dimension stress discipline |
+| `NSH` / `NSH dry` / `NSH minimal` | [NATURAL-STOP-HANDOFF.md](protocols/NATURAL-STOP-HANDOFF.md) | Proactive session-close + handoff |
+| `PRD` | [PRD.md](protocols/PRD.md) | Interactive Product Requirements Document creation |
+| `PRD-TO-ISSUES` | [PRD-TO-ISSUES.md](protocols/PRD-TO-ISSUES.md) | Tracer-bullet vertical-slice decomposition |
+| `UL` / `UBIQUITOUS-LANGUAGE` | [UBIQUITOUS-LANGUAGE.md](protocols/UBIQUITOUS-LANGUAGE.md) | DDD glossary extraction (auto-suggested by NSH) |
+| `IA` / `IMPROVE-ARCHITECTURE` | [IMPROVE-ARCHITECTURE.md](protocols/IMPROVE-ARCHITECTURE.md) | Codebase audit + parallel sub-agent interface designs |
+
+Git-safety + git-hygiene apply automatically to every git operation; no trigger needed.
 
 ## Engineering protocols (complement to GNGM)
 
@@ -186,6 +228,7 @@ gngm/
     ├── gngm-health.sh              10-second 4-tool health check
     ├── gngm-init.sh                tool bootstrap (graphify + Graphiti)
     ├── gngm-full-scaffold.sh       FULL project scaffold (structure + tools)
+    ├── gngm-update.sh              non-destructive refresh for already-installed GNGM
     ├── gngm-hygiene-check.sh       validate frontmatter + cross-refs
     └── install-services.sh         one-shot services installer
 ```
