@@ -130,7 +130,14 @@ GNGM is the knowledge stack. These are the engineering disciplines that use it:
 - **[protocols/STRESS-TEST.md](protocols/STRESS-TEST.md)** — **Stress-test discipline.** 7 dimensions (concurrency, burst rate, reconnect churn, state exhaustion, memory leak, cascading failure, long-tail latency). Smart small-N pressure with falsifiable invariants + cost guards. Triggers: `STRESS`, `STRESS <feature>`.
 - **[protocols/NATURAL-STOP-HANDOFF.md](protocols/NATURAL-STOP-HANDOFF.md)** — **NSH.** When work hits a clean natural stop (logical-unit complete + tree clean + tests green + clarity high), Claude proactively runs the 7-step session-close: verify → tests → GNGM sweep → push work → write detailed handoff → update active state → commit + push handoff → signal `/clear`-ready. Variants: `NSH dry`, `NSH no push`, `NSH minimal`. Closes the off-machine-gap + discovery-rot + state-drift trio that bites every long session.
 
-All nine are universal across projects; no project-specific context required.
+**Product / scoping cluster (added 0.6.0):**
+
+- **[protocols/PRD.md](protocols/PRD.md)** — **Product Requirements Document.** Interactive PRD creation through user interview, GNGM-grounded codebase exploration, and deep-module sketching. Closes the front-of-funnel gap where SDP currently assumes a spec already exists. 5 steps: get the long form → GNGM the codebase → interview relentlessly → sketch deep modules → write the PRD. Trigger: `PRD`.
+- **[protocols/PRD-TO-ISSUES.md](protocols/PRD-TO-ISSUES.md)** — **Vertical-slice decomposition.** Break a PRD into independently-grabbable issues using tracer-bullet vertical slices (each cuts through every layer end-to-end). HITL vs AFK explicit. Each completed issue feeds one SDP loop. Trigger: `PRD-TO-ISSUES`.
+- **[protocols/UBIQUITOUS-LANGUAGE.md](protocols/UBIQUITOUS-LANGUAGE.md)** — **Domain glossary protocol.** Extract a DDD-style glossary from conversation / PRD / codebase. Flags ambiguities (one word for many concepts, many words for one concept) and proposes canonical terms with aliases-to-avoid. Saves to `UBIQUITOUS_LANGUAGE.md`. Auto-suggested by NSH Step 3.5 when glossary is stale. Triggers: `UBIQUITOUS-LANGUAGE`, `UL`.
+- **[protocols/IMPROVE-ARCHITECTURE.md](protocols/IMPROVE-ARCHITECTURE.md)** — **Codebase architectural audit.** Explore organically (friction-as-signal, not rigid heuristics), surface deepening candidates per Ousterhout's deep-module thesis, spawn 3+ parallel sub-agents to design competing interfaces, ship an opinionated refactor RFC. Complements RAC at the L3 (Execution) layer where module shape determines testability + AI-navigability. Triggers: `IMPROVE-ARCHITECTURE`, `IA`.
+
+All thirteen are universal across projects; no project-specific context required.
 
 ## Repository structure
 
@@ -153,11 +160,16 @@ gngm/
 │   ├── SDP.md                      Standard Development Protocol
 │   ├── TDD.md                      TDD baseline + First-Debug Protocol
 │   ├── GIT-SAFETY.md               git safety rules
+│   ├── GIT-HYGIENE.md              everyday commit + push discipline
 │   ├── RAC.md                      Repeatable Action Chain (universal pipeline methodology)
 │   ├── DEBUG.md                    Systematic debugging — Iron Law + R1-R11 runbooks
 │   ├── LOGGING.md                  Backend+frontend logging + correlation-ID contract
 │   ├── STRESS-TEST.md              7-dimension stress discipline
-│   └── NATURAL-STOP-HANDOFF.md     NSH — proactive session close + handoff
+│   ├── NATURAL-STOP-HANDOFF.md     NSH — proactive session close + handoff
+│   ├── PRD.md                      Product Requirements Document (front-of-funnel for SDP)
+│   ├── PRD-TO-ISSUES.md            Vertical-slice decomposition (PRD → tracer-bullet issues)
+│   ├── UBIQUITOUS-LANGUAGE.md      DDD glossary protocol (auto-suggested by NSH)
+│   └── IMPROVE-ARCHITECTURE.md     Codebase architectural audit (parallel sub-agent designs)
 ├── templates/
 │   ├── CLAUDE.md.tpl               project-level instructions template
 │   ├── MEMORY.md.tpl               memory trunk template

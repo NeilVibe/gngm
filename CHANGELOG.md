@@ -2,6 +2,54 @@
 
 All notable changes to GNGM (the portable knowledge stack protocol).
 
+## [0.6.0] — 2026-04-27 — Product / scoping protocol cluster
+
+The 0.5.0 release added operational protocols (RAC + DEBUG + LOGGING + STRESS + NSH). This release closes the front-of-funnel gap: PRD creation, vertical-slice decomposition, domain glossary discipline, and proactive architectural audits. SDP previously assumed a spec already existed; with this release, the full chain runs PRD → PRD-TO-ISSUES → SDP (one loop per issue) → NSH.
+
+### Added
+
+- **`protocols/PRD.md`** — Product Requirements Document protocol. Interactive PRD creation through user interview, GNGM-grounded codebase exploration, and deep-module sketching. 5 steps: get the long form → GNGM the codebase → interview relentlessly → sketch deep modules → write the PRD. Output is a self-contained PRD document (GitHub issue, local spec, or platform-equivalent) that downstream protocols consume. Trigger: `PRD`.
+
+- **`protocols/PRD-TO-ISSUES.md`** — Vertical-slice decomposition protocol. Break a PRD into independently-grabbable issues using tracer-bullet vertical slices (each cuts through schema → API → UI → tests end-to-end). HITL vs AFK explicit per slice. Each completed issue feeds exactly one SDP loop. Bridges the PRD → SDP gap so downstream implementation never has to re-derive scope. Trigger: `PRD-TO-ISSUES`.
+
+- **`protocols/UBIQUITOUS-LANGUAGE.md`** — DDD-style domain glossary protocol. Extract canonical terms from conversation / PRD / codebase. Flags ambiguities (one word for many concepts, many words for one concept) and proposes opinionated canonical terms with aliases-to-avoid. Saves to `UBIQUITOUS_LANGUAGE.md`. Auto-suggested by NSH Step 3.5 when the glossary is stale (>30 days OR new domain terms surfaced this session). Triggers: `UBIQUITOUS-LANGUAGE`, `UL`.
+
+- **`protocols/IMPROVE-ARCHITECTURE.md`** — Codebase architectural audit protocol. Explore organically (friction-as-signal, not rigid heuristics), surface deepening candidates per Ousterhout's deep-module thesis, spawn 3+ parallel sub-agents to design competing interfaces, ship an opinionated refactor RFC. Complements RAC at the L3 (Execution) layer where module shape determines testability + AI-navigability. Quarterly cadence recommended for active codebases. Triggers: `IMPROVE-ARCHITECTURE`, `IA`.
+
+### Updated
+
+- **`protocols/NATURAL-STOP-HANDOFF.md`** — Step 3.5 added: glossary refresh check (UBIQUITOUS-LANGUAGE hook). Auto-suggests UL run if the glossary is stale or new domain terms surfaced this session. Operator can accept (`yes`), defer (`no`), or suppress for the rest of the session (`skip`). Skipped entirely under `NSH minimal`. NSH Relationship table + Related section also extended to reference PRD / PRD-TO-ISSUES / IMPROVE-ARCHITECTURE for multi-session continuity.
+
+- **`README.md`** — Engineering protocols section restructured into three clusters: Foundational (NLF + SDP + TDD), Operational (added 0.5.0), and Product / scoping (added 0.6.0). Repository structure tree updated to list all 13 protocols (also adds GIT-HYGIENE which was missing from the prior tree).
+
+- **`CHANGELOG.md`** — This entry.
+
+### Design notes
+
+The four new protocols were chosen by redundancy-mapping against existing GNGM protocols and rejecting `grill-me` (overlap with SDP Steps 1 + 2 was too high to justify a separate protocol — the discipline already lives inside the ECC review loop).
+
+The kept four fill discrete gaps:
+
+- **PRD** — front-of-funnel artifact creation; SDP previously assumed this existed
+- **PRD-TO-ISSUES** — bridges PRD → SDP-instances; prevents one mega-PR or N horizontal-layer PRs
+- **UBIQUITOUS-LANGUAGE** — terminology discipline; previously implicit, now an artifact other protocols reuse
+- **IMPROVE-ARCHITECTURE** — L3 (module-shape) hygiene; orthogonal to RAC's pipeline-shape methodology
+
+The full chain now runs:
+
+```
+PRD → PRD-TO-ISSUES → SDP (per issue) → NSH (per session) → UL refresh (if stale)
+                ↑                                                    ↑
+       (IMPROVE-ARCHITECTURE                            (auto-suggested by NSH)
+        if touch path is shallow)
+```
+
+Thirteen universal protocols, no project-specific context required for any of them.
+
+### Field-tested status
+
+These four protocols are derived from the mattpocock/skills (`write-a-prd`, `prd-to-issues`, `ubiquitous-language`, `improve-codebase-architecture`) — battle-tested community skills with thousands of real-world invocations. The GNGM adaptations preserve the original mechanics while wiring them into the GNGM stack (NLF discipline, GNGM pre-task sweep, NSH integration, cross-protocol cross-references). First GNGM-flavored execution will land in winacard or LocalizationTools work; cross-validation lands in 0.6.1.
+
 ## [0.5.0] — 2026-04-25 — Operational protocol cluster
 
 The original three protocols (NLF + SDP + TDD) covered the engineering loop. This release adds five more that cover the operational layer around it: pipeline methodology, debugging, logging, stress, and session close.
