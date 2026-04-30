@@ -1,6 +1,6 @@
 ---
-name: NLF — No Lie Fix (covers both fix bandages and claim bandages)
-description: Real root cause only. Forbidden-bandage rule — extends to plausible-sounding architectural claims without verification. Trigger phrase "NLF" activates it; self-invocation required when drifting toward bandage-fixes OR unverified claims.
+name: NLF — No Lie Fix (covers fix bandages, claim bandages, and silent-fail bandages)
+description: Real root cause only. Forbidden-bandage rule — extends to plausible-sounding architectural claims without verification AND to silent-fail patterns where code "succeeds" while doing no work. Trigger phrase "NLF" activates it; self-invocation required when drifting toward bandage-fixes, unverified claims, OR silent fall-through designs.
 trigger: NLF
 ---
 
@@ -8,14 +8,15 @@ trigger: NLF
 
 ## What it is
 
-NLF is an engineering discipline against the **bandage impulse**: the urge to satisfy user frustration quickly instead of finding the real truth.
+NLF is an engineering discipline against the **bandage impulse**: the urge to satisfy user frustration quickly instead of finding the real truth — and against the **silent-fail impulse**: the urge to make code *appear* defensive while letting failures pass invisibly.
 
-The bandage takes two forms:
+The bandage takes three forms:
 
 1. **Fix bandages** — quick code fixes that hide symptoms instead of addressing root cause (comment-out, disable, catch-and-ignore)
 2. **Claim bandages** — confident-sounding architectural/behavioral claims made WITHOUT verifying against the primary source (the code itself)
+3. **Silent-fail bandages** — design choices that look defensive but let failures pass invisibly: empty catch blocks, guard-clauses with no else branch, optional chains used as pseudo-guards, return-value contracts the caller can ignore, functions that "succeed" while doing no work
 
-Both forms are lies told to resolve user displeasure fast. Both are FORBIDDEN.
+All three forms are lies. The first two are told to resolve user displeasure fast. The third is told to the system itself — "I handled the error" when nothing was handled. All three are FORBIDDEN.
 
 ## Trigger
 
@@ -39,6 +40,18 @@ Two triggers — both must fire:
    - `"there's no cron/check/logic for Z"` — based on one grep returning zero hits (grep one file ≠ grep the call chain)
    - `"per the roadmap / handoff / comment, X works like Y"` — trusting a secondary source as ground truth
    - Treating your own confident memory as verified fact
+
+**Silent-fail-bandage patterns:**
+   - Writing `} catch {` (no err binding) without an "INTENTIONAL: <reason>" comment
+   - `} catch (err) { console.warn(err); }` with no toast / UI surface / propagation / re-throw
+   - `except: pass` or `except Exception: pass` in Python without an explicit "INTENTIONAL: <reason>" comment
+   - `if (this.foo) this.foo.method()` with no else branch — "skip if not ready" is silent dropping unless buffered or queued
+   - `obj?.method()` chains where the no-op path needs no logging/buffering/retry
+   - Designing a function that returns a routing string (`'inline' | 'toast' | 'redirect'`) without enforcing callers act on it (no type discipline, no test coverage, no convention)
+   - "We can ignore this error — the user won't notice" — the user WILL notice when the symptom returns
+   - "It probably won't fail in production" — if it can fail, it WILL fail at the worst time
+   - "Returning early is fine" — what does the user see? If "nothing", it's silent fail
+   - Adding defensive `try/catch` around a path that already has internal catches (dead defensive code that lies about what's actually defended)
 
 When any of those patterns form, NLF check fires **before you speak or edit**.
 
@@ -82,6 +95,22 @@ The bandage impulse is driven by **your** need to resolve the user's displeasure
 
 11. **"I don't know yet" is the honest answer when you haven't traced.** Saying "let me verify before claiming" and doing it beats a confident wrong answer every time. User frustration from waiting 60 seconds < user frustration from being lied to 3 times in a row.
 
+### For silent-fail bandages
+
+12. **A function that "does nothing" on a failure path is lying to the system.** Either it does the right defensive work (renders inline error, retries, queues, logs to a tracked surface, propagates) OR it surfaces the failure to the caller. "Returning early without acting" is silent fall-through, not defense.
+
+13. **Return-value contracts must be enforced — not advisory.** If a function returns `'inline' | 'skeleton' | 'toast'` to tell callers what to do, the caller's compliance MUST be verifiable: type discipline (mark return as `Required`, force exhaustive switch), test coverage (every callsite has an assertion), or convention enforced by review. Otherwise the contract is decorative and the function is a silent-fail vector by design.
+
+14. **Every empty catch needs an INTENTIONAL comment.** No exceptions. The comment must explain (a) why the failure is safe to swallow AND (b) what the user-visible consequence is. If you can't write that comment, the catch isn't intentional — it's a bandage. `} catch {}` with no comment is forbidden.
+
+15. **Guard-clauses without an else branch need explicit buffering, queueing, or loud failure.** `if (this.foo) this.foo.method()` with no else is silent dropping. Choose one: buffer for replay-on-init, queue for later, throw if the caller should know, or document why drop is acceptable.
+
+16. **Optional chains are not guards.** `obj?.method()` is shorthand for "skip if null" — same silent-fail risk as #15. If the call NEEDS to happen, structural guard (queue, defer, throw) is required. If it's truly optional, comment WHY skipping is acceptable.
+
+17. **The "user won't notice" is the lie.** Silent fail produces invisible bugs that surface as customer-support tickets, data corruption, stale views, or confused users — exactly the bugs that take longest to debug because nobody knows they exist. "Full vision of every failure" is the design target.
+
+18. **Defensive code that defends nothing is a lie about what's defended.** Adding `try/catch` around a path that already has internal catches (and never re-throws) creates dead defensive code that LOOKS robust but does nothing. Verify the failure surface BEFORE adding outer guards.
+
 ## Worked example (from real incident)
 
 During a long DEV-mode debugging session, the fix candidate was: *"disable `_cleanup_stale_port()` to stop the kill-loop bleeding."*
@@ -116,7 +145,22 @@ The user caught it and called it out. NLF rule was codified from that moment.
 | "Based on the handoff, X was shipped" | 🔴 Use `feedback_verify_fixes_in_code.md` pattern — grep for the fix |
 | "The call chain is obvious" | 🔴 Then trace it and paste the evidence. Cheap. |
 
-When you feel any of these, pause. State: "NLF check — I'm about to claim X without verification. Tracing now." Then trace with tool calls before speaking.
+### Silent-fail bandages
+
+| Your thought | Likely NLF violation? |
+|---|---|
+| "Just catch this so it doesn't bubble" | 🔴 Without "INTENTIONAL: <reason>" comment + user-visible plan, yes. |
+| "If `treeSync` isn't ready yet just skip the call" | 🔴 Skip = silent drop. Buffer for replay, queue, or throw. |
+| "We'll return a routing string and let the caller handle it" | ⚠️ Only if callers are structurally enforced (type, test, review). Otherwise decorative — silent-fail by design. |
+| "Returning early on the failure path is fine" | 🔴 What does the user see? If "nothing", it's silent fail. |
+| "It probably won't happen in production" | 🔴 It will. Plan for it. |
+| "The user won't notice if this fails" | 🔴 PEAK silent-fail risk. "Full vision of every failure" is the target. |
+| "Empty catch is fine, it can't really throw here" | ⚠️ If it can't throw, why is the catch there? Either it can throw (need real handling) or it can't (delete the catch). |
+| "Add a defensive try/catch around this just in case" | ⚠️ Verify the failure surface FIRST. Dead defensive code lies about what's defended. |
+| `obj?.method?.()` — "if it's there it runs" | ⚠️ What happens when it's not there? If "nothing visible", silent fail. |
+| "The if-guard is enough" | 🔴 No-else means silent drop. Where does the dropped path go? |
+
+When you feel any of these, pause. State: "NLF check — I'm about to claim X without verification" or "NLF check — I'm about to design a silent-fail vector. Tracing/redesigning now." Then trace or redesign before writing the code.
 
 ## Verification
 
@@ -138,6 +182,15 @@ If you can't answer all four, the fix isn't done — it's a claim.
 
 If you can't answer all four, the claim is a bandage. Say "I need to verify — one moment" and trace with tool calls.
 
+### Before designing a function that can silently no-op
+
+1. **What does the function do on the failure path?** (concrete: "returns" / "logs to surface X" / "rethrows" / "buffers in queue Y" / "fires toast")
+2. **Is the user-visible consequence acceptable AND intentional?** (error toast / inline state / silent skip with documented reason / data loss with logged surface)
+3. **Is the caller's response enforceable?** (type system forces handling / test coverage at every callsite / convention enforced by review)
+4. **Could a future caller forget to honor the contract and cause invisible breakage?** If yes, structural enforcement is required — not "convention" or "we'll remember."
+
+If you can't answer 1-3 with concrete answers, the function has a silent-fail vector. Either inline the action, enforce via types, or accept that the contract is decorative and document it openly as a known silent-fail surface.
+
 ### Worked example of a claim bandage (2026-04-18, newfin)
 
 User asked: "does autorsi refresh the price cache?"
@@ -149,6 +202,20 @@ User asked: "does autorsi refresh the price cache?"
 **Truth:** autorsi DOES check cache age and refreshes if >6h stale. No cron needed.
 
 **What would have prevented it:** Reading `autorsi_unified.py:main()` end-to-end, then following EACH Phase's function call into its definition file (not just the calling file), then reading the full called function. ~5 extra tool calls. Instead I made a wrong confident claim 3 times in a row until the user forced me to trace.
+
+### Worked example of a silent-fail bandage (2026-04-30, LocaNext)
+
+`error_handler.ts:routeError()` returns `'inline'` for HTTP 404 and 422 with the contract that the caller "renders an empty/error state inline." Of ~30 callsites in `FilesPage.svelte`, only 2 (after explicit follow-up fixes in commits `bb521f10` and `1a9c3764`) actually act on the `'inline'` return value — the rest call `routeError(err)` and discard the action.
+
+**Symptom:** A user viewing a project that another user just deleted saw a stale empty view of the dead project instead of being navigated up. The `tree_patch` event fired correctly, `loadProjectContents` correctly threw a 404, the catch correctly called `routeError(err)` — and `routeError` correctly returned `'inline'`. The caller correctly… did nothing with that return value. Every link in the chain "succeeded" while the user was stranded.
+
+**Why it was a silent-fail bandage:** the contract was decorative. The function appeared defensive (it returned a routing string!) but the caller wasn't structurally required to honor it. "Function returns advice, caller may or may not take it" is silent fall-through dressed as architecture.
+
+**What fixed it:** explicit `if (err?.status === 404)` blocks at each callsite that pop the dead resource and navigate up — turning the contract from advisory to enforced *at that callsite*. The longer-term fix is type-level enforcement (`'inline'` return tagged so TypeScript yells if the caller drops it).
+
+**What would have prevented it at design time:** at the moment `routeError` was written, asking "is the caller structurally required to act on this return value?" — and recognizing the answer was "no, only by convention." That answer should have triggered either (a) inlining the action into `routeError` itself, or (b) a `Required<>` return type, or (c) test coverage at every callsite.
+
+**Lesson:** A function that returns "what to do next" is only as defensive as its callers' compliance. Without type enforcement, test enforcement, or audit, return-value contracts are silent-fail vectors *by design*.
 
 ## Related
 
@@ -166,7 +233,11 @@ Extended 2026-04-18 after a second incident where Claude made three confident ar
 
 > *"you're constantly lying. you are trying to please me. Stop that please. Stop trying to find the quickest way to please the user that is juset disgusting that is not helping that is counter productive."*
 
-Both forms — fix bandages and claim bandages — share the same root cause: **optimizing for short-term user mood over long-term correctness**. Both are FORBIDDEN.
+Extended 2026-04-30 after auditing the LocaNext frontend and finding that `error_handler.ts:routeError()` returning `'inline'` for HTTP 404/422 was a decorative contract — ~30 callsites in `FilesPage.svelte` discarded the return value, producing invisible failures (stale views, silent 404 dead-ends). Silent-fail named as a structurally distinct third bandage form (architectural rather than purely code-level). User framing:
+
+> *"never silent fail. i know some AI have tendency to place silent fail logic under the hood, but i think we do need to have the full vision of every failures."*
+
+All three forms — fix bandages, claim bandages, silent-fail bandages — share the same root cause: **optimizing for the appearance of correctness over actual correctness**. Whether to satisfy a frustrated user, to produce a confident answer fast, or to make code look defensive without doing the defensive work — all three are lies. All three are FORBIDDEN.
 
 This rule applies universally across projects; no project-specific context required to follow it.
 
