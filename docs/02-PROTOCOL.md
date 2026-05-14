@@ -350,6 +350,9 @@ Skip if trivial. Include if patterns / rules / architecture shifted.
 | Search sequentially (G→N→V→M) | 4× slower | Parallel in one message |
 | Compile a wiki without writing content | Tool doesn't auto-distill | Claude must synthesize body |
 | Forget `group_ids=['newfin']` on search | Spans all projects | Always pass (PLURAL on search) |
+| Pre-warm Qwen 9B with `keep_alive: 600` or `-1` | Pins 8.6 GB VRAM, blocks every other GPU consumer | `keep_alive ≤ 60` for pre-warm; explicit `keep_alive: 0` unload after work; see [VRAM-HYGIENE.md](../protocols/VRAM-HYGIENE.md) |
+| Verify unload with `sleep 2 && /api/ps` | Ollama needs 3-4s to actually unload, snapshot is stale | `sleep 5` minimum before re-checking |
+| Re-implement work the handoff said was "pending" without GNGM pre-task search | Handoffs go stale fast; prior session may have shipped it | Always Graphiti+NeuralTree+Viking search BEFORE coding |
 
 ## Why GNGM vs individual tool names
 

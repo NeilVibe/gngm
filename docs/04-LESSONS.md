@@ -277,6 +277,30 @@ The full scaffold is idempotent — safe to re-run, never clobbers existing file
 
 **Source:** discovered while bootstrapping a new project (2026-04-23). Tools were green but memory trunk + CLAUDE.md + docs tree were missing. Had to retrofit everything manually. `gngm-full-scaffold.sh` codifies that manual work so nobody else has to.
 
+## 12. Pre-warm pin = user's machine "obliterated" (2026-05-15)
+
+**Symptom:** Graphiti `add_episode` timed out on cold load (Ollama default 180s). Operator pre-warmed Qwen3.5:9b with `keep_alive: 600` (10min) before retrying. Retry succeeded in ~30s — model then sat at 8.6 GB VRAM for **9.5 more minutes**, blocking every other GPU consumer on the user's 12 GB card. User exploded in frustration: "WHY IS IT PINNED" / "WHY DO YOU KEEP PINNING IT" / "FUCKINHELL CHANGE THE CODE".
+
+**Root cause:** asymmetric understanding of what `keep_alive` means.
+
+The Graphiti client (`qwen_client.py`) doesn't set `keep_alive` — it uses Ollama's default of 5 minutes (300s). That's bounded and tolerable. **The bug is when operators add explicit longer values "to stay warm"** — `keep_alive: 600` doubles Ollama's default, `keep_alive: -1` pins forever. On a single-GPU dev machine running other GPU workloads (Qwen3-VL for AVQA, local image-gen, browser compositor, etc.), this is catastrophic.
+
+The reason it feels like "the computer is obliterated": the threshold is binary, not gradual. A 12 GB card minus 8.6 GB pinned = 3.4 GB free. Below 6 GB, Qwen3-VL can't load. Below 4 GB, browser starts swapping. Below 2 GB, OS GPU compositor stutters. Going from "Graphiti works" to "nothing works" happens the instant Qwen pins.
+
+**Secondary failure:** the operator's verification check used `sleep 2 && curl /api/ps` to confirm the unload after firing `keep_alive: 0`. Ollama takes 3-4s to actually unload after the API returns — so `/api/ps` still showed the model as loaded. User saw "Models loaded: 1" in the report and concluded "you keep pinning it" — when in reality the model WAS unloaded but the snapshot was stale by 1-2 seconds.
+
+**Fix — codified in [protocols/VRAM-HYGIENE.md](../protocols/VRAM-HYGIENE.md):**
+
+- Pre-warm: `keep_alive ≤ 60` (60 seconds). Never 300, never 600, never `-1`.
+- After every Graphiti session: explicit `keep_alive: 0` unload.
+- Verify with **`sleep 5`** before `/api/ps` (not `sleep 2`). Cross-check with `nvidia-smi`.
+- Generalization: any model with `size_vram > 4 GB` follows the same rule.
+- Permanent pin (`keep_alive: -1`) is FORBIDDEN unless explicitly opted into by the user for a known batch workload on a dedicated machine.
+
+**Operating rule:** treat the user's GPU as a shared, contested resource — not a private Graphiti cache. Even if the pin "doesn't matter for Graphiti", the user is doing other work on the same card.
+
+**Source:** 2026-05-15 LocaNext session, mid-Tier-2 work on audio-codex follow-ups. Real-user pushback was severe and immediate. Protocol patch + project-level rule + GNGM `02-PROTOCOL.md` anti-patterns + this lesson all landed in one commit.
+
 ## Meta-theme
 
 Seven of the ten pitfalls share a theme: **something succeeded at the surface level (exit 0, HIGH confidence, "all green") but the actual side effect didn't happen.**
