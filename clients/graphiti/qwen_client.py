@@ -500,6 +500,15 @@ class OllamaQwenClient(OpenAIClient):
                 'format': 'json',
                 'stream': False,
                 'think': False,  # CRITICAL: disables Qwen thinking mode
+                # VRAM-HYGIENE (2026-05-15): cap keep_alive at 60s — Ollama's
+                # default of 5min was leaving 8.6 GB pinned on the user's 12 GB
+                # card after every add_episode call, blocking Qwen3-VL +
+                # local image-gen + browser GPU. Each chat call resets the
+                # lease to "now + 60s", so multi-call episodes stay warm
+                # internally while the model evicts ~60s after the LAST call
+                # instead of 5 minutes.
+                # See: ~/gngm/protocols/VRAM-HYGIENE.md
+                'keep_alive': 60,
                 'options': {
                     'temperature': temperature or 0,
                     'num_predict': max(max_tokens, 2000),
@@ -688,3 +697,44 @@ async def create_qwen_graphiti(
     # Do NOT call build_indices_and_constraints -- indexes already exist
 
     return g
+
+
+async def unload_qwen(
+    model: str = 'qwen3.5:9b',
+    ollama_url: str = 'http://localhost:11434',
+) -> bool:
+    """Force-unload a Qwen model from Ollama VRAM (keep_alive=0).
+
+    VRAM-HYGIENE (2026-05-15): every script that calls add_episode SHOULD
+    invoke this in a try/finally after the work completes — belt-and-suspenders
+    on top of the in-payload keep_alive=60 bound. Even though the model
+    auto-evicts ~60s after the last chat call, an explicit unload reclaims
+    the 8.6 GB immediately so the user's other GPU workloads (Qwen3-VL,
+    image-gen, etc.) can resume.
+
+    Best-effort: returns True on success, False on connection failure.
+    Does NOT raise — failure to unload is non-fatal (model will expire on
+    its own keep_alive lease).
+
+    Usage:
+        from qwen_client import create_qwen_graphiti, unload_qwen
+        try:
+            g = await create_qwen_graphiti(graph_name='myproj')
+            await g.add_episode(...)
+        finally:
+            await unload_qwen()  # <-- VRAM reclaimed immediately
+    """
+    import httpx
+    base = ollama_url.rstrip('/')
+    if base.endswith('/v1'):
+        base = base[:-3]
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            await client.post(
+                f'{base}/api/generate',
+                json={'model': model, 'keep_alive': 0, 'prompt': '', 'stream': False},
+            )
+        return True
+    except Exception:
+        # Non-fatal — model has a bounded keep_alive lease anyway.
+        return False
