@@ -2,7 +2,7 @@
 name: GNGM Setup — Prerequisites + Installation
 description: Sets up the four services (FalkorDB, Ollama+Qwen, Viking, NeuralTree MCP) + Memory MCP wiring for a fresh machine. Skip most if already set up for another project; jump to per-project bootstrap at bottom. Lighter alternative to 00-INSTALL-FROM-SCRATCH.md.
 type: gngm-doc
-last_verified: 2026-04-27
+last_verified: 2026-05-16
 ---
 
 # GNGM Setup — Prerequisites + Installation
@@ -49,7 +49,7 @@ Located at `~/.graphiti/qwen_client.py`. Includes multi-stage salvage pipeline f
 Dependencies:
 
 ```bash
-pip install graphiti-core falkordb-client aiohttp
+pip install 'graphiti-core[falkordb]==0.29.0' aiohttp httpx
 ```
 
 Quick test:
@@ -72,8 +72,8 @@ asyncio.run(m())
 ### 4. Graphify
 
 ```bash
-# Install (note: double-y in PyPI, single y in CLI)
-pip install "graphifyy[mcp]"
+# Install (note: double-y in PyPI, single y in CLI). Pinned for reproducibility.
+pip install "graphifyy[mcp]==0.8.5"
 
 # Verify CLI exists
 which graphify

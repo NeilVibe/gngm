@@ -27,14 +27,19 @@ from graphiti_core.embedder.client import EmbedderClient
 logger = logging.getLogger(__name__)
 
 # Few-shot examples keyed by Pydantic model __name__. MUST match actual schemas.
-# Updated 2026-04-11 to match current graphiti_core schemas.
+# Verified 2026-05-16 against graphiti-core 0.29.0 via schema introspection.
+# 0.29.0 schema facts reflected below:
+#   - ExtractedEntity / Edge gained `episode_indices` (single episode -> [0]).
+#   - NodeDuplicate uses int `id` + int `duplicate_candidate_id` (-1 = no dup);
+#     the old string `duplicate_name` field was removed.
+#   - SummaryDescription has only `description` (old `summary` field removed).
 _FEW_SHOT_EXAMPLES: dict[str, str] = {
-    'ExtractedEntities': '{"extracted_entities": [{"name": "FAISS", "entity_type_id": 0}, {"name": "PostgreSQL", "entity_type_id": 1}]}',
-    'ExtractedEdges': '{"edges": [{"source_entity_name": "SystemA", "target_entity_name": "SystemB", "relation_type": "DEPENDS_ON", "fact": "SystemA depends on SystemB for data", "valid_at": null, "invalid_at": null}]}',
+    'ExtractedEntities': '{"extracted_entities": [{"name": "FAISS", "entity_type_id": 0, "episode_indices": [0]}, {"name": "PostgreSQL", "entity_type_id": 1, "episode_indices": [0]}]}',
+    'ExtractedEdges': '{"edges": [{"source_entity_name": "SystemA", "target_entity_name": "SystemB", "relation_type": "DEPENDS_ON", "fact": "SystemA depends on SystemB for data", "valid_at": null, "invalid_at": null, "episode_indices": [0]}]}',
     'SummarizedEntities': '{"summaries": [{"name": "SystemA", "summary": "SystemA is a backend service that processes data"}]}',
-    'NodeResolutions': '{"entity_resolutions": [{"id": "abc-123", "name": "SystemA", "duplicate_name": ""}]}',
+    'NodeResolutions': '{"entity_resolutions": [{"id": 0, "name": "SystemA", "duplicate_candidate_id": -1}]}',
     'EdgeDuplicate': '{"duplicate_facts": [], "contradicted_facts": []}',
-    'SummaryDescription': '{"summary": "A component that does X", "description": "Detailed description of the component"}',
+    'SummaryDescription': '{"description": "A one-sentence description of the provided summary"}',
 }
 
 
@@ -81,6 +86,8 @@ _KEY_SYNONYMS: dict[str, set[str]] = {
     'duplicate_facts': {'duplicates', 'duplicated_facts'},
     'contradicted_facts': {'contradictions'},
     'summary': {'text', 'description'},
+    # SummaryDescription's required top-level key is `description` (graphiti-core 0.29.0).
+    'description': {'summary', 'text', 'content', 'desc'},
 }
 
 # 2026-04-18: item-level synonym map for when Qwen uses wrong field names
@@ -93,7 +100,9 @@ _ITEM_FIELD_SYNONYMS: dict[str, set[str]] = {
     'relation_type': {'type', 'relation', 'predicate', 'verb', 'edge_type'},
     'fact': {'description', 'text', 'content', 'statement'},
     'summary': {'text', 'description', 'content'},
-    'duplicate_name': {'duplicate', 'dup', 'dup_name', 'alias'},
+    # graphiti-core 0.29.0: NodeDuplicate uses int `duplicate_candidate_id`
+    # (-1 = no duplicate); the old string `duplicate_name` field was removed.
+    'duplicate_candidate_id': {'duplicate_id', 'dup_id', 'candidate_id', 'duplicate', 'match_id'},
     'id': {'idx', 'index'},
 }
 
@@ -148,6 +157,15 @@ def _normalize_item(item: dict, required_fields: dict) -> dict:
             out['id'] = int(out['id'])
         except ValueError:
             pass  # leave as-is; Graphiti will error if needed
+    # graphiti-core 0.29.0: NodeDuplicate.duplicate_candidate_id is an int where
+    # -1 means "no duplicate". Coerce a bad/missing value to -1 rather than
+    # letting the generic required-field filler (Step 3) default it to 0 --
+    # 0 is a valid candidate id and would assert a false-positive merge.
+    if 'duplicate_candidate_id' in required_fields and not isinstance(out.get('duplicate_candidate_id'), int):
+        try:
+            out['duplicate_candidate_id'] = int(out['duplicate_candidate_id'])
+        except (ValueError, TypeError, KeyError):
+            out['duplicate_candidate_id'] = -1
 
     # Step 3: ensure required fields exist; fill with sensible defaults
     for field_name, field_schema in required_fields.items():

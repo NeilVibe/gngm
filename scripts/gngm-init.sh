@@ -91,7 +91,7 @@ else
     echo "  Creating .venv-graphify/ + installing graphifyy[mcp]..."
     python3 -m venv .venv-graphify 2>&1 | tail -1
     .venv-graphify/bin/pip install --upgrade pip 2>&1 | tail -1
-    .venv-graphify/bin/pip install "graphifyy[mcp]" 2>&1 | tail -2
+    .venv-graphify/bin/pip install "graphifyy[mcp]==0.8.5" 2>&1 | tail -2
     if [ -x ".venv-graphify/bin/graphify" ]; then
         GRAPHIFY_BIN=".venv-graphify/bin/graphify"
         echo -e "  ${GREEN}✓${RESET} graphify installed at .venv-graphify/bin/graphify"
@@ -128,10 +128,10 @@ fi
 # 4. First Graphiti episode (establishes graph_id)
 echo ""
 echo "[4/5] Seeding Graphiti graph '$GRAPH_NAME' ..."
-if [ -f "/home/neil1988/.graphiti/qwen_client.py" ]; then
+if [ -f "$HOME/.graphiti/qwen_client.py" ]; then
     python3 <<PY 2>&1 | tail -3
 import asyncio, sys
-sys.path.insert(0, '/home/neil1988/.graphiti')
+sys.path.insert(0, '$HOME/.graphiti')
 from qwen_client import create_qwen_graphiti
 from datetime import datetime, timezone
 

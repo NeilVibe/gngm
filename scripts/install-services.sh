@@ -156,7 +156,7 @@ cp "$REPO_DIR/clients/graphiti/qwen_client.py" "$HOME/.graphiti/qwen_client.py"
 cp "$REPO_DIR/clients/graphiti/feed_project.py" "$HOME/.graphiti/feed_project.py"
 say_ok "Client files copied to $HOME/.graphiti/"
 
-pip install graphiti-core falkordb-client aiohttp httpx 2>&1 | tail -1
+pip install 'graphiti-core[falkordb]==0.29.0' aiohttp httpx 2>&1 | tail -1
 say_ok "Python dependencies installed"
 
 # Smoke test

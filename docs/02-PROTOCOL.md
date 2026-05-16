@@ -2,7 +2,7 @@
 name: GNGM Protocol — Full Mechanics
 description: The canonical 4-mode protocol that fires when "GNGM" is said in chat. Modes — Pre-task (search before doing), Post-fix (feed what you learned), Organizational (cleanup/audit), Health (10-second status). Each mode walks the four tools (Graphiti + NeuralTree + Viking + MemoryMCP) so no blind spot.
 type: gngm-doc
-last_verified: 2026-04-27
+last_verified: 2026-05-16
 ---
 
 # GNGM Protocol — Full Mechanics
@@ -367,11 +367,14 @@ The four tools overlap BY DESIGN. Overlap lets:
 
 ## Related
 
+- [00-INSTALL-FROM-SCRATCH.md](00-INSTALL-FROM-SCRATCH.md) — full install pipeline
 - [01-SETUP.md](01-SETUP.md) — prerequisites for the 4 tools
 - [03-CHEATSHEET.md](03-CHEATSHEET.md) — one-page quick reference
 - [04-LESSONS.md](04-LESSONS.md) — production pitfalls + resilience patterns
 - [05-PROJECT-STRUCTURE.md](05-PROJECT-STRUCTURE.md) — where GNGM artifacts live in the project tree
 - [06-WAVE-PROTOCOL.md](06-WAVE-PROTOCOL.md) — wave lifecycle that uses GNGM at every stage
+- [07-GRAPHIFY-MASTERY.md](07-GRAPHIFY-MASTERY.md) — using the Graphify code graph to full potential
+- [08-GRAPHITI-MASTERY.md](08-GRAPHITI-MASTERY.md) — using the Graphiti temporal graph to full potential
 
 ## Docs
 

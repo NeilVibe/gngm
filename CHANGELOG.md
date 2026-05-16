@@ -2,6 +2,78 @@
 
 All notable changes to GNGM (the portable knowledge stack protocol).
 
+## [0.7.0] — 2026-05-16 — Tool refresh: Graphify 0.8.5, Graphiti 0.29.0, mastery docs
+
+Pins the knowledge-stack tools to current, verified versions; ships two
+tool-mastery guides and an opt-in upgrade path for already-installed projects.
+
+**Honest framing.** The two tools did not move equally — any broadcast of this
+release should say so:
+
+- **Graphify 0.4.x → 0.8.5** is a real upgrade — idempotent rebuilds with
+  stable community IDs, headless `extract` with free/local backends, cross-repo
+  `global` graphs, `callflow-html` diagrams, ~10 more languages.
+- **graphiti-core 0.28.x → 0.29.0** is a maintenance bump — one minor version:
+  security currency, an opt-in combined-extraction path (kept *off* on local
+  Qwen), `summarize_saga`. No new capability GNGM relies on.
+
+### Added
+
+- **`docs/07-GRAPHIFY-MASTERY.md`** — using the Graphify code graph to full
+  potential: verified 0.8.5 command grammar, graph-first reasoning, backends,
+  idempotency. States plainly that Graphify has no embeddings and no spectral
+  methods — it is AST + Leiden, by deliberate design.
+- **`docs/08-GRAPHITI-MASTERY.md`** — using the Graphiti temporal graph to full
+  potential: episode discipline, the causal-chain rule, validity windows,
+  correction episodes, sagas, and the honest local-Qwen caveats.
+- **`docs/UPGRADE-0.7.0.md`** — the migration guide for existing projects.
+- **`scripts/gngm-upgrade-tools.sh`** — opt-in tool upgrade. Rebuilds
+  `.venv-graphify` to the pinned graphifyy, does the one-time 0.4→0.8 graph
+  housekeeping (cache clear, ghost-duplicate cleanup, community renumber), bumps
+  graphiti-core, refreshes the vendored client. Prompts before mutating;
+  idempotent. Kept separate from `gngm-update.sh` so that stays docs-only.
+- **`clients/` now propagates.** `install.sh` and `gngm-update.sh` carry
+  `docs/GNGM/clients/` into consuming projects, so the vendored Graphiti client
+  actually reaches the fleet — previously it never left this repo.
+
+### Changed
+
+- **Versions pinned** — `graphifyy[mcp]==0.8.5` and
+  `graphiti-core[falkordb]==0.29.0` across `gngm-init.sh`, `install-services.sh`,
+  `00-INSTALL-FROM-SCRATCH.md`, `01-SETUP.md`, `gngm-health.sh`, and the README.
+  Unpinned installs are what let the docs drift ~4 versions behind reality.
+- **`clients/graphiti/qwen_client.py`** — verified against graphiti-core 0.29.0
+  by schema introspection, then patched: the `NodeResolutions` and
+  `SummaryDescription` few-shot examples were stale (they referenced the removed
+  `duplicate_name` field and a removed `summary` field) and would have
+  mis-taught the local Qwen extractor. Few-shots corrected, the dead
+  `duplicate_name` synonym repointed to `duplicate_candidate_id`, and
+  `episode_indices` added to the entity/edge examples.
+- `gngm-update.sh` now also refreshes `docs/GNGM/clients/`; its non-destructive
+  contract is now `{protocols,docs,scripts,clients}/`.
+- The installed-project README heredocs (`install.sh`, `gngm-update.sh`) now
+  list docs 00–08 + UPGRADE and the `gngm-upgrade-tools.sh` step.
+
+### Fixed
+
+- **`gngm-init.sh`** — hardcoded `/home/neil1988/.graphiti` path; broke the
+  Graphiti seed step for every consuming project not on the author's machine.
+  Now `$HOME/.graphiti`.
+- **`01-SETUP.md`** — the Graphiti install line omitted `httpx`, which the
+  vendored client imports; following the doc verbatim would `ImportError`.
+- **Graphiti install lines** — switched the hand-listed `falkordb-client` to
+  graphiti-core's official `[falkordb]` extra (verified to pull the correct
+  driver dependency).
+- **`gngm-health.sh`** — the "graphify missing" fix hint printed an unpinned
+  `graphifyy[mcp]`; now pinned.
+
+### Known follow-ups (not in this release)
+
+- `01-SETUP.md`, `02-PROTOCOL.md`, and `03-CHEATSHEET.md` still use `newfin` as
+  the example project name (and a hardcoded home path in code samples). A
+  de-specialization pass to generic `<your-project>` placeholders is recommended
+  as a focused fast-follow.
+
 ## [0.6.2] — 2026-04-27 — Hygiene closure (script bug fix + frontmatter sweep)
 
 `bash scripts/gngm-hygiene-check.sh` now returns ✅ all green. Closes a structural-discipline gap that 0.6.0 + 0.6.1 added new protocols around but didn't audit the existing baseline against.

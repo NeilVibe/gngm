@@ -2,7 +2,7 @@
 name: GNGM Install from Scratch — Full Pipeline (8 phases)
 description: Comprehensive installation guide for setting up the complete GNGM knowledge stack on a fresh machine — Docker, Ollama, Qwen 3.5 9B, FalkorDB, Viking, NeuralTree MCP, Memory MCP, Graphiti client, Graphify venv, Claude Code wiring. Everything is open-source. Designed for end-to-end execution by Claude Code or a human.
 type: gngm-doc
-last_verified: 2026-04-27
+last_verified: 2026-05-16
 ---
 
 # Install from scratch — full GNGM pipeline
@@ -235,8 +235,8 @@ mkdir -p ~/.graphiti
 cp /path/to/gngm/clients/graphiti/qwen_client.py ~/.graphiti/
 cp /path/to/gngm/clients/graphiti/feed_project.py ~/.graphiti/
 
-# Install dependencies (system pip is fine, small set)
-pip install graphiti-core falkordb-client aiohttp httpx
+# Install dependencies (pinned: graphiti-core 0.29.0 + the falkordb driver extra)
+pip install 'graphiti-core[falkordb]==0.29.0' aiohttp httpx
 
 # Smoke test
 python3 -c "
@@ -264,7 +264,7 @@ Graphify is installed per-project in a venv. The `gngm-init.sh` script handles t
 ```bash
 # In the project root
 python3 -m venv .venv-graphify
-.venv-graphify/bin/pip install "graphifyy[mcp]"
+.venv-graphify/bin/pip install "graphifyy[mcp]==0.8.5"
 
 # Install the post-commit hook (auto-refresh graph on every commit)
 .venv-graphify/bin/graphify hook install
@@ -477,8 +477,12 @@ If all 8 checks pass, you're done. Start saying `GNGM` in Claude Code.
 - [01-SETUP.md](01-SETUP.md) — prerequisites + minimal setup variant
 - [02-PROTOCOL.md](02-PROTOCOL.md) — full protocol mechanics once installed
 - [03-CHEATSHEET.md](03-CHEATSHEET.md) — quick reference during work
-- [04-LESSONS.md](04-LESSONS.md) — 9 pitfalls + resilience patterns
+- [04-LESSONS.md](04-LESSONS.md) — pitfalls + resilience patterns
 - [05-PROJECT-STRUCTURE.md](05-PROJECT-STRUCTURE.md) — canonical project tree
+- [06-WAVE-PROTOCOL.md](06-WAVE-PROTOCOL.md) — wave lifecycle
+- [07-GRAPHIFY-MASTERY.md](07-GRAPHIFY-MASTERY.md) — using Graphify to full potential
+- [08-GRAPHITI-MASTERY.md](08-GRAPHITI-MASTERY.md) — using Graphiti to full potential
+- [UPGRADE-0.7.0.md](UPGRADE-0.7.0.md) — moving an existing project to 0.7.0
 
 ## Docs
 

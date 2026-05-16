@@ -100,7 +100,7 @@ elif command -v graphify >/dev/null 2>&1; then
     ok=$((ok + 1))
 else
     echo -e "  ${RED}FAIL${RESET} graphify CLI not found"
-    echo "       Fix: python3 -m venv .venv-graphify && .venv-graphify/bin/pip install 'graphifyy[mcp]'"
+    echo "       Fix: python3 -m venv .venv-graphify && .venv-graphify/bin/pip install 'graphifyy[mcp]==0.8.5'"
     fail=$((fail + 1))
 fi
 

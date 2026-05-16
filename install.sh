@@ -60,10 +60,11 @@ if [ -d "$TARGET_DOCS" ]; then
 fi
 
 # Create target + copy files
-mkdir -p "$TARGET_DOCS/docs" "$TARGET_DOCS/scripts" "$TARGET_DOCS/protocols"
+mkdir -p "$TARGET_DOCS/docs" "$TARGET_DOCS/scripts" "$TARGET_DOCS/protocols" "$TARGET_DOCS/clients/graphiti"
 cp "$SOURCE_DIR/docs"/*.md "$TARGET_DOCS/docs/" 2>/dev/null
 cp "$SOURCE_DIR/scripts"/*.sh "$TARGET_DOCS/scripts/"
 cp "$SOURCE_DIR/protocols"/*.md "$TARGET_DOCS/protocols/" 2>/dev/null
+cp "$SOURCE_DIR/clients/graphiti"/*.py "$TARGET_DOCS/clients/graphiti/" 2>/dev/null
 chmod +x "$TARGET_DOCS/scripts"/*.sh
 
 # Also drop a thin README at the top of docs/GNGM/ pointing to the detailed docs
@@ -88,10 +89,26 @@ bash docs/GNGM/scripts/gngm-health.sh
 
 See `docs/GNGM/docs/`:
 
+- `00-INSTALL-FROM-SCRATCH.md` — full install pipeline
 - `01-SETUP.md` — prerequisites + installation
 - `02-PROTOCOL.md` — full 4-mode protocol
 - `03-CHEATSHEET.md` — one-page reference
-- `04-LESSONS.md` — 9 pitfalls + resilience patterns
+- `04-LESSONS.md` — pitfalls + resilience patterns
+- `05-PROJECT-STRUCTURE.md` — canonical project tree
+- `06-WAVE-PROTOCOL.md` — wave lifecycle
+- `07-GRAPHIFY-MASTERY.md` — using Graphify to full potential
+- `08-GRAPHITI-MASTERY.md` — using Graphiti to full potential
+- `UPGRADE-0.7.0.md` — moving an existing project to release 0.7.0
+
+## Keeping current
+
+```bash
+# Refresh GNGM docs + scripts + client (non-destructive)
+bash docs/GNGM/scripts/gngm-update.sh
+
+# Then upgrade the tool versions (opt-in)
+bash docs/GNGM/scripts/gngm-upgrade-tools.sh
+```
 EOF
 
 echo ""

@@ -1,3 +1,12 @@
+---
+name: VRAM-HYGIENE — Never long-pin Qwen 3.5:9B (or any model) on a dev GPU
+description: Hard rule against long-pinning the Graphiti extraction model (or any >4 GB model) in GPU VRAM. keep_alive by scenario, the correct pre-warm pattern, the mandatory end-of-session unload diagnostic. Codified after a real incident where keep_alive=600 pinned 8.6 GB for 10 minutes on a 12 GB card.
+type: gngm-protocol
+version: 1
+last_verified: 2026-05-16
+trigger: self-applied around every Graphiti add_episode and GPU model load
+---
+
 # VRAM-HYGIENE — Never long-pin Qwen 3.5:9B (or any model) on a dev GPU
 
 > **Status:** Hard rule. Codified 2026-05-15 after a real-user incident.
@@ -124,6 +133,12 @@ in-memory bookkeeping.
 - [GIT-SAFETY.md](GIT-SAFETY.md) — sister discipline: don't destroy user state silently
 - [GIT-HYGIENE.md](GIT-HYGIENE.md) — sister discipline: don't lose user work
 - [`docs/02-PROTOCOL.md`](../docs/02-PROTOCOL.md) §"Anti-patterns" — pointer back to this file
+
+## Docs
+
+- `../clients/graphiti/qwen_client.py` — caps `keep_alive` at 60s; provides the `unload_qwen()` helper
+- `../docs/08-GRAPHITI-MASTERY.md` §"The local-Qwen reality" — VRAM hygiene inside the Graphiti workflow
+- Ollama `/api/generate` + `/api/ps` — the `keep_alive` parameter and the load-state snapshot
 
 ## Changelog
 

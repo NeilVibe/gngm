@@ -42,10 +42,11 @@ bash scripts/install-services.sh
 
 | Path | What it does | When to use |
 |---|---|---|
-| `install.sh` | Copies GNGM docs + protocols + scripts into `<project>/docs/GNGM/` | Minimal — just want the reference docs |
+| `install.sh` | Copies GNGM docs + protocols + scripts + client into `<project>/docs/GNGM/` | Minimal — just want the reference docs |
 | `gngm-init.sh` | Tools bootstrap: Graphify venv + hooks + Graphiti seed + health check | Just want the TOOLS |
 | **`gngm-full-scaffold.sh`** | **Full project structure: memory trunk + CLAUDE.md/AGENTS.md + docs tree + lessons + tools** | **Recommended — new projects OR grafting onto existing repos** |
-| `gngm-update.sh` | **Refresh an already-installed GNGM** (non-destructive — only touches `docs/GNGM/{protocols,docs,scripts}/`) | When upstream ships new protocols and you want to pick them up without reinstalling |
+| `gngm-update.sh` | **Refresh an already-installed GNGM** (non-destructive — only touches `docs/GNGM/{protocols,docs,scripts,clients}/`) | When upstream ships new protocols/docs and you want to pick them up without reinstalling |
+| `gngm-upgrade-tools.sh` | **Opt-in upgrade of the tool versions** (rebuilds `.venv-graphify`, bumps graphiti-core) | When a GNGM release pins newer Graphify / graphiti-core versions |
 
 ### Full scaffold (recommended, ~1 minute)
 
@@ -72,7 +73,7 @@ bash docs/GNGM/scripts/gngm-update.sh
 curl -fsSL https://raw.githubusercontent.com/NeilVibe/gngm/main/scripts/gngm-update.sh | bash -s -- /path/to/your/project
 ```
 
-`gngm-update.sh` ONLY touches `<project>/docs/GNGM/{protocols,docs,scripts}/`. It never touches:
+`gngm-update.sh` ONLY touches `<project>/docs/GNGM/{protocols,docs,scripts,clients}/`. It never touches:
 
 - `<project>/CLAUDE.md` / `MEMORY.md` / `MASTER_PLAN.md` (your project files)
 - `<project>/docs/` outside the GNGM subtree
@@ -197,9 +198,12 @@ gngm/
 │   ├── 01-SETUP.md                 prerequisites + installation
 │   ├── 02-PROTOCOL.md              full 4-mode protocol mechanics
 │   ├── 03-CHEATSHEET.md            one-page quick reference
-│   ├── 04-LESSONS.md               11 pitfalls + resilience patterns
+│   ├── 04-LESSONS.md               pitfalls + resilience patterns
 │   ├── 05-PROJECT-STRUCTURE.md     canonical project tree + adaptation patterns
-│   └── 06-WAVE-PROTOCOL.md         wave lifecycle (7 stages) — works for any stack
+│   ├── 06-WAVE-PROTOCOL.md         wave lifecycle (7 stages) — works for any stack
+│   ├── 07-GRAPHIFY-MASTERY.md      using the Graphify code graph to full potential
+│   ├── 08-GRAPHITI-MASTERY.md      using the Graphiti temporal graph to full potential
+│   └── UPGRADE-0.7.0.md            moving an existing project to release 0.7.0
 ├── protocols/
 │   ├── NLF.md                      No Lie Fix — real root cause only
 │   ├── SDP.md                      Standard Development Protocol
@@ -231,7 +235,8 @@ gngm/
     ├── gngm-health.sh              10-second 4-tool health check
     ├── gngm-init.sh                tool bootstrap (graphify + Graphiti)
     ├── gngm-full-scaffold.sh       FULL project scaffold (structure + tools)
-    ├── gngm-update.sh              non-destructive refresh for already-installed GNGM
+    ├── gngm-update.sh              non-destructive docs refresh for installed GNGM
+    ├── gngm-upgrade-tools.sh       opt-in tool-version upgrade (graphify + graphiti-core)
     ├── gngm-hygiene-check.sh       validate frontmatter + cross-refs
     └── install-services.sh         one-shot services installer
 ```
@@ -253,7 +258,7 @@ elif command -v graphify >/dev/null 2>&1; then
     GRAPHIFY_BIN="$(command -v graphify)"              # 2. global install
 else
     python3 -m venv .venv-graphify                     # 3. auto-create
-    .venv-graphify/bin/pip install "graphifyy[mcp]"
+    .venv-graphify/bin/pip install "graphifyy[mcp]==0.8.5"
 fi
 ```
 

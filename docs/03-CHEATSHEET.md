@@ -2,7 +2,7 @@
 name: GNGM Cheatsheet — Quick Reference
 description: One-page pinnable reference for the full GNGM 4-tool protocol — trigger phrases, pre-task / post-fix / organizational checklists, health check, tool recipes for Graphiti / NeuralTree / Viking / Memory.
 type: gngm-doc
-last_verified: 2026-04-27
+last_verified: 2026-05-16
 ---
 
 # GNGM Cheatsheet — Quick Reference
@@ -201,6 +201,8 @@ memory.create_relations([{from, to, relationType}])
 - [01-SETUP.md](01-SETUP.md) — prerequisites for the 4 tools
 - [00-INSTALL-FROM-SCRATCH.md](00-INSTALL-FROM-SCRATCH.md) — comprehensive install guide
 - [06-WAVE-PROTOCOL.md](06-WAVE-PROTOCOL.md) — wave lifecycle that uses these checklists per stage
+- [07-GRAPHIFY-MASTERY.md](07-GRAPHIFY-MASTERY.md) — using Graphify to full potential
+- [08-GRAPHITI-MASTERY.md](08-GRAPHITI-MASTERY.md) — using Graphiti to full potential
 
 ## Docs
 

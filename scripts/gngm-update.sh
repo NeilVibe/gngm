@@ -15,6 +15,7 @@
 #     - docs/GNGM/protocols/   ← full overwrite from upstream
 #     - docs/GNGM/docs/        ← full overwrite from upstream
 #     - docs/GNGM/scripts/     ← full overwrite from upstream
+#     - docs/GNGM/clients/     ← full overwrite from upstream (vendored Graphiti client)
 #     - docs/GNGM/README.md    ← refreshed
 #
 #   What it does NOT touch:
@@ -101,10 +102,10 @@ echo ""
 
 echo "Refreshing GNGM-managed subtree (non-destructive to project files)..."
 
-mkdir -p "$TARGET_DOCS/protocols" "$TARGET_DOCS/docs" "$TARGET_DOCS/scripts"
+mkdir -p "$TARGET_DOCS/protocols" "$TARGET_DOCS/docs" "$TARGET_DOCS/scripts" "$TARGET_DOCS/clients/graphiti"
 
 # Wipe + recopy each managed subdirectory. Safe because we ONLY touch
-# docs/GNGM/{protocols,docs,scripts}/ — never anything else.
+# docs/GNGM/{protocols,docs,scripts,clients}/ — never anything else.
 rm -f "$TARGET_DOCS/protocols"/*.md
 cp "$SOURCE_DIR/protocols"/*.md "$TARGET_DOCS/protocols/"
 
@@ -114,6 +115,9 @@ cp "$SOURCE_DIR/docs"/*.md "$TARGET_DOCS/docs/" 2>/dev/null || true
 rm -f "$TARGET_DOCS/scripts"/*.sh
 cp "$SOURCE_DIR/scripts"/*.sh "$TARGET_DOCS/scripts/"
 chmod +x "$TARGET_DOCS/scripts"/*.sh
+
+rm -f "$TARGET_DOCS/clients/graphiti"/*.py
+cp "$SOURCE_DIR/clients/graphiti"/*.py "$TARGET_DOCS/clients/graphiti/"
 
 # README.md inside the installed dir (the "thin" pointer) is regenerated
 # fresh from the install.sh-style template so it stays current
@@ -131,22 +135,29 @@ bash docs/GNGM/scripts/gngm-init.sh
 # 2. Health check any time
 bash docs/GNGM/scripts/gngm-health.sh
 
-# 3. Refresh THIS install when upstream ships new protocols
+# 3. Refresh THIS install when upstream ships new protocols/docs
 bash docs/GNGM/scripts/gngm-update.sh
 
-# 4. Say "GNGM" / "PRD" / "NSH" / etc. in Claude Code to trigger protocols
+# 4. Upgrade tool versions when a release pins newer ones (opt-in)
+bash docs/GNGM/scripts/gngm-upgrade-tools.sh
+
+# 5. Say "GNGM" / "PRD" / "NSH" / etc. in Claude Code to trigger protocols
 ```
 
 ## Detailed docs
 
 See `docs/GNGM/docs/`:
 
+- `00-INSTALL-FROM-SCRATCH.md` — full install pipeline
 - `01-SETUP.md` — prerequisites + installation
 - `02-PROTOCOL.md` — full 4-mode protocol
 - `03-CHEATSHEET.md` — one-page reference
 - `04-LESSONS.md` — pitfalls + resilience patterns
 - `05-PROJECT-STRUCTURE.md` — canonical project tree
 - `06-WAVE-PROTOCOL.md` — wave lifecycle
+- `07-GRAPHIFY-MASTERY.md` — using Graphify to full potential
+- `08-GRAPHITI-MASTERY.md` — using Graphiti to full potential
+- `UPGRADE-0.7.0.md` — moving an existing project to release 0.7.0
 
 ## Protocols
 

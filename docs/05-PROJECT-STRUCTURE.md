@@ -2,7 +2,7 @@
 name: GNGM Project Structure — Harnessing the Full Power of GNGM
 description: GNGM is only half the story; the other half is the project structure the knowledge stack lives inside. Canonical project tree, adaptation patterns for any language/stack, multi-CLI support (CLAUDE.md / AGENTS.md / GEMINI.md), and the rules that make the structure compound rather than rot.
 type: gngm-doc
-last_verified: 2026-04-27
+last_verified: 2026-05-16
 ---
 
 # Project Structure — Harnessing the Full Power of GNGM
@@ -56,9 +56,9 @@ The scaffold script prompts which one(s) to create. They're equivalent — same 
 ├── docs/
 │   ├── INDEX.md                  (master doc index)
 │   ├── GNGM/                     (knowledge stack protocols — from install.sh)
-│   │   ├── docs/                 (00-INSTALL … 06-WAVE-PROTOCOL)
+│   │   ├── docs/                 (00-INSTALL … 08-GRAPHITI-MASTERY + UPGRADE notes)
 │   │   ├── protocols/            (14 universal protocols — see GNGM/README.md for the full list grouped by cluster)
-│   │   └── scripts/              (gngm-init, gngm-health, gngm-full-scaffold, gngm-update)
+│   │   └── scripts/              (gngm-init, gngm-health, gngm-full-scaffold, gngm-update, gngm-upgrade-tools)
 │   ├── current/                  (active handoffs — MAX 3 files)
 │   │   └── _INDEX.md
 │   ├── architecture/             (system design — populated as built)
@@ -193,6 +193,8 @@ Each component alone is useful. Together they compound. Skip any component and t
 - [01-SETUP.md](01-SETUP.md) — prerequisites + installation
 - [02-PROTOCOL.md](02-PROTOCOL.md) — GNGM mechanics
 - [06-WAVE-PROTOCOL.md](06-WAVE-PROTOCOL.md) — how waves run against this structure
+- [07-GRAPHIFY-MASTERY.md](07-GRAPHIFY-MASTERY.md) — using Graphify to full potential
+- [08-GRAPHITI-MASTERY.md](08-GRAPHITI-MASTERY.md) — using Graphiti to full potential
 - [04-LESSONS.md](04-LESSONS.md) — pitfalls
 
 ## Docs
