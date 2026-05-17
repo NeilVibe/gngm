@@ -1,9 +1,9 @@
 ---
 name: VRAM-HYGIENE — Never long-pin Qwen 3.5:9B (or any model) on a dev GPU
-description: Hard rule against long-pinning the Graphiti extraction model (or any >4 GB model) in GPU VRAM. keep_alive by scenario, the correct pre-warm pattern, the mandatory end-of-session unload diagnostic. Codified after a real incident where keep_alive=600 pinned 8.6 GB for 10 minutes on a 12 GB card.
+description: Hard rule against long-pinning the Graphiti extraction model (or any >4 GB model) in GPU VRAM. keep_alive by scenario, the correct pre-warm pattern, the mandatory end-of-session unload diagnostic. Also covers the CPU-starvation case — an add_episode timeout with a clear GPU is not VRAM contention. Codified after a real incident where keep_alive=600 pinned 8.6 GB for 10 minutes on a 12 GB card.
 type: gngm-protocol
-version: 1
-last_verified: 2026-05-16
+version: 2
+last_verified: 2026-05-17
 trigger: self-applied around every Graphiti add_episode and GPU model load
 ---
 
@@ -127,6 +127,49 @@ model as "loaded" even though it's already evicting.
 reading reflects actual VRAM state; `/api/ps` reflects Ollama's
 in-memory bookkeeping.
 
+## CPU starvation — a non-VRAM cause of `add_episode` timeout (sub-rule)
+
+Not every `add_episode` timeout is a VRAM problem. The model cold-load
+(reading 6.6 GB off disk + CPU-side tensor setup) is **disk- and
+CPU-bound**, not GPU-bound. When an unrelated process is saturating the
+CPU, the cold-load crawls and `add_episode` times out **even though the
+GPU is completely free** — so eviction has nothing to evict, and
+restarting Ollama does nothing (Ollama is healthy).
+
+**Distinguish it from VRAM contention before acting:**
+
+| Check | VRAM contention | CPU starvation |
+|---|---|---|
+| `/api/ps` | another model loaded (e.g. qwen3-vl) | **empty** |
+| `nvidia-smi` VRAM | near full | plenty free |
+| `uptime` loadavg | normal | **far above `nproc`** |
+
+If `/api/ps` is empty AND VRAM is free AND loadavg is far above core
+count → it is CPU starvation. Escapes:
+
+1. **Use the smaller model** — `create_qwen_graphiti(..., model='qwen3.5:4b')`.
+   The 4b cold-load is ~half the 9b's (3.4 GB vs 6.6 GB), so it completes
+   inside the timeout where 9b does not. Extraction is slightly weaker —
+   an acceptable trade for an episode that otherwise never lands.
+2. **Defer** the episode until the CPU hog finishes.
+3. Do **not** `renice`/kill the other process without the user's say-so —
+   it may be a deliberate run.
+
+**Verified 2026-05-17 (LocaNext):** a 9b `add_episode` was SIGKILL'd at a
+400 s cap while an unrelated backtest held ~1000 % CPU; the GPU was clear
+the whole time. The `qwen3.5:4b` retry landed it — its first attempt
+still hit the 180 s cold-load timeout, but the client's built-in retry
+then succeeded on the now-warm model.
+
+```
+add_episode times out, BOTH attempts
+  ├─ /api/ps shows another model loaded? → VRAM contention → evict it
+  └─ /api/ps empty?
+       ├─ uptime loadavg far above nproc? → CPU starvation
+       │     → retry with qwen3.5:4b, OR defer. NOT an Ollama fault.
+       └─ loadavg normal? → Ollama daemon issue → restart Ollama
+```
+
 ## Related
 
 - [DEBUG.md R5](DEBUG.md) — vision-pipeline batch case where `keep_alive=-1` IS appropriate (DIFFERENT scenario — dedicated production batch, not interactive dev)
@@ -142,4 +185,5 @@ in-memory bookkeeping.
 
 ## Changelog
 
+- 2026-05-17 — v2. Added the CPU-starvation sub-rule: an `add_episode` timeout with `/api/ps` empty + GPU free + loadavg far above `nproc` is CPU starvation, NOT VRAM contention and NOT an Ollama fault. Distinguish via the checks table; escape with `qwen3.5:4b` or defer. Verified same day on LocaNext (9b killed at a 400 s cap under a ~1000 % CPU backtest; the 4b retry landed).
 - 2026-05-15 — v1. Codified after LocaNext incident: pre-warm with `keep_alive: 600` pinned 8.6 GB for 10 min on user's 12 GB card.
