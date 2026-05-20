@@ -2,6 +2,46 @@
 
 All notable changes to GNGM (the portable knowledge stack protocol).
 
+## [0.8.0] — 2026-05-21 — `/goal` autonomous mode + explicit AST refresh at NSH
+
+Adds the `/goal` autonomous-mode guide and makes the Graphify AST refresh an
+explicit, unconditional step of the Natural Stop Handoff — the code graph must
+never lag the code at a session close.
+
+### Added
+
+- **`docs/09-GOAL-AUTONOMOUS-MODE.md`** — how to use Claude Code's `/goal`
+  command (v2.1.139+) as a disciplined autonomy muscle. Core idea: `/goal` runs
+  the work-loop, but **the completion condition is the discipline contract** —
+  the Haiku evaluator checks the *condition*, not the methodology, so the GNGM
+  gates (NLF proof artifacts, TDD RED→GREEN, wave CLOSE, the knowledge feed)
+  must be encoded INTO the condition. Includes the loaded-≠-enforced
+  clarification (the protocols load every turn, but "in context" is not
+  "enforced" — the condition is), the executor-not-gates scoping, and the
+  `stop after N turns` budget / ambiguity escape hatch. Stack-agnostic;
+  generalized from a field-tested winacard draft.
+- **`VERSION`** — a top-level version file (`0.8.0`), copied into
+  `docs/GNGM/VERSION` by `install.sh` and `gngm-update.sh`. A consuming project
+  can now check the GNGM release it is on with `cat docs/GNGM/VERSION` and
+  compare against the upstream CHANGELOG to see what an update would bring.
+  `gngm-update.sh` also prints the version after each refresh.
+
+### Changed
+
+- **`protocols/NATURAL-STOP-HANDOFF.md`** — Step 3 (GNGM post-fix sweep) gains
+  an explicit **Graphify AST refresh** sub-step (`graphify update .`).
+  Previously the AST graph was refreshed only implicitly via the post-commit
+  hook; NSH now makes it explicit and unconditional — every natural stop
+  refreshes the code graph, hook installed or not. `version: 1 → 2`.
+- **`docs/06-WAVE-PROTOCOL.md`** — Stage 4 (EXECUTE) step 5 now states
+  explicitly that the post-commit hook refreshes the Graphify AST graph on
+  *every* atomic commit (~10s, no LLM) — so with atomic per-task commits the
+  code graph is kept current many times per wave, *during* the work, not just
+  at session close.
+- **`README.md`, `install.sh`, `scripts/gngm-update.sh`, `docs/02-PROTOCOL.md`**
+  — doc lists and the installed-project README heredocs now include `09`, so
+  `gngm-update` carries the new doc into every consuming project.
+
 ## [0.7.0] — 2026-05-16 — Tool refresh: Graphify 0.8.5, Graphiti 0.29.0, mastery docs
 
 Pins the knowledge-stack tools to current, verified versions; ships two

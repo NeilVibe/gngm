@@ -128,7 +128,7 @@ For each task:
 2. Implement to make it pass (TDD green)
 3. Smoke test (import + adjacent test — NOT full suite, that's CI's job)
 4. Commit atomic: `feat(scope): description` or `fix(scope): description`
-5. Graphify post-commit hook fires (automatic via installed hook)
+5. Graphify AST refresh — the post-commit hook runs `graphify update` automatically on each atomic commit (~10s, AST-only, no LLM). Deliberate: with atomic per-task commits the code graph refreshes many times per wave and never lags the code. If the hook is not installed, run `graphify update .` manually after each commit. Keep the AST graph current *during* the work, not only at session close.
 
 NLF discipline throughout:
 - No "comment out / catch-and-ignore" bandages

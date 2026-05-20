@@ -119,6 +119,9 @@ chmod +x "$TARGET_DOCS/scripts"/*.sh
 rm -f "$TARGET_DOCS/clients/graphiti"/*.py
 cp "$SOURCE_DIR/clients/graphiti"/*.py "$TARGET_DOCS/clients/graphiti/"
 
+# Version stamp — lets a consuming project check which GNGM release it is on
+cp "$SOURCE_DIR/VERSION" "$TARGET_DOCS/VERSION" 2>/dev/null || true
+
 # README.md inside the installed dir (the "thin" pointer) is regenerated
 # fresh from the install.sh-style template so it stays current
 cat > "$TARGET_DOCS/README.md" <<'EOF'
@@ -157,6 +160,7 @@ See `docs/GNGM/docs/`:
 - `06-WAVE-PROTOCOL.md` — wave lifecycle
 - `07-GRAPHIFY-MASTERY.md` — using Graphify to full potential
 - `08-GRAPHITI-MASTERY.md` — using Graphiti to full potential
+- `09-GOAL-AUTONOMOUS-MODE.md` — Claude Code `/goal` as a discipline-preserving autonomy muscle
 - `UPGRADE-0.7.0.md` — moving an existing project to release 0.7.0
 
 ## Protocols
@@ -194,6 +198,7 @@ if [ -n "${CLEANUP_SOURCE:-}" ] && [ -d "$SOURCE_DIR" ]; then
 fi
 
 echo -e "${GREEN}Update complete.${RESET}"
+echo "GNGM version: $(cat "$TARGET_DOCS/VERSION" 2>/dev/null || echo 'unknown (pre-0.8.0)')"
 echo ""
 echo "Next steps:"
 echo "  - Review protocol changes:    git -C $TARGET diff --stat docs/GNGM/"

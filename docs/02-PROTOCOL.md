@@ -375,6 +375,7 @@ The four tools overlap BY DESIGN. Overlap lets:
 - [06-WAVE-PROTOCOL.md](06-WAVE-PROTOCOL.md) — wave lifecycle that uses GNGM at every stage
 - [07-GRAPHIFY-MASTERY.md](07-GRAPHIFY-MASTERY.md) — using the Graphify code graph to full potential
 - [08-GRAPHITI-MASTERY.md](08-GRAPHITI-MASTERY.md) — using the Graphiti temporal graph to full potential
+- [09-GOAL-AUTONOMOUS-MODE.md](09-GOAL-AUTONOMOUS-MODE.md) — `/goal` autonomous mode with GNGM-disciplined completion conditions
 
 ## Docs
 

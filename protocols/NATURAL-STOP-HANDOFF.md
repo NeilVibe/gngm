@@ -2,8 +2,8 @@
 name: Natural Stop Handoff (NSH) Protocol
 description: When work reaches a clean, natural stopping point — wave done, commit batch shipped, tests green, tree clean, clarity high — Claude proactively commits, pushes to origin/main, writes an extremely detailed handoff, and signals /clear-ready. Designed so the next session lands soft after a context wipe.
 type: gngm-protocol
-version: 1
-last_verified: 2026-04-25
+version: 2
+last_verified: 2026-05-21
 trigger: NSH (explicit) OR Claude-initiated when criteria met
 ---
 
@@ -94,7 +94,13 @@ a. **Graphiti episode** — capture WHY + causal chain for what just landed.
 b. **NeuralTree lesson_add** — for any NOVEL pattern surfaced this session.
    Skip if it duplicates an existing lesson (use `lesson_match` first).
 
-c. **Update `memory/active/_INDEX.md`** — current wave, what shipped, blockers, next action. Drop stale carry-over.
+c. **Graphify AST refresh** — re-extract the code graph so the structural layer never lags the code. Cheap (~10s, AST-only, no LLM):
+   ```bash
+   graphify update .
+   ```
+   The post-commit hook (if installed) already runs this on each commit — but NSH makes it **explicit and unconditional**: every natural stop refreshes the AST graph, hook or no hook. Any session that added or modified a meaningful chunk of code MUST have a current graph before the handoff is written.
+
+d. **Update `memory/active/_INDEX.md`** — current wave, what shipped, blockers, next action. Drop stale carry-over.
 
 ### Step 3.5 — Glossary refresh check (UBIQUITOUS-LANGUAGE hook)
 

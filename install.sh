@@ -65,6 +65,7 @@ cp "$SOURCE_DIR/docs"/*.md "$TARGET_DOCS/docs/" 2>/dev/null
 cp "$SOURCE_DIR/scripts"/*.sh "$TARGET_DOCS/scripts/"
 cp "$SOURCE_DIR/protocols"/*.md "$TARGET_DOCS/protocols/" 2>/dev/null
 cp "$SOURCE_DIR/clients/graphiti"/*.py "$TARGET_DOCS/clients/graphiti/" 2>/dev/null
+cp "$SOURCE_DIR/VERSION" "$TARGET_DOCS/VERSION" 2>/dev/null || true
 chmod +x "$TARGET_DOCS/scripts"/*.sh
 
 # Also drop a thin README at the top of docs/GNGM/ pointing to the detailed docs
@@ -98,6 +99,7 @@ See `docs/GNGM/docs/`:
 - `06-WAVE-PROTOCOL.md` — wave lifecycle
 - `07-GRAPHIFY-MASTERY.md` — using Graphify to full potential
 - `08-GRAPHITI-MASTERY.md` — using Graphiti to full potential
+- `09-GOAL-AUTONOMOUS-MODE.md` — Claude Code `/goal` as a discipline-preserving autonomy muscle
 - `UPGRADE-0.7.0.md` — moving an existing project to release 0.7.0
 
 ## Keeping current

@@ -82,6 +82,8 @@ curl -fsSL https://raw.githubusercontent.com/NeilVibe/gngm/main/scripts/gngm-upd
 
 After running, check the diff (`git diff --stat docs/GNGM/`) and commit (`chore(gngm): update to latest`). Pair with `bash docs/GNGM/scripts/gngm-health.sh` to verify all four services still respond.
 
+**Checking your version.** Every install carries a `docs/GNGM/VERSION` stamp. Run `cat docs/GNGM/VERSION` to see which GNGM release a project is on, then compare against the upstream [CHANGELOG.md](CHANGELOG.md) to see what an update would bring.
+
 ### CLI AI support
 
 GNGM works with any CLI AI. The scaffold script supports:
@@ -192,6 +194,7 @@ gngm/
 ├── README.md              (this file)
 ├── LICENSE                MIT
 ├── CHANGELOG.md           version history
+├── VERSION                current release tag — consuming installs carry a copy
 ├── install.sh             one-command installer for any project
 ├── docs/
 │   ├── 00-INSTALL-FROM-SCRATCH.md  (8-phase install guide)
@@ -203,6 +206,7 @@ gngm/
 │   ├── 06-WAVE-PROTOCOL.md         wave lifecycle (7 stages) — works for any stack
 │   ├── 07-GRAPHIFY-MASTERY.md      using the Graphify code graph to full potential
 │   ├── 08-GRAPHITI-MASTERY.md      using the Graphiti temporal graph to full potential
+│   ├── 09-GOAL-AUTONOMOUS-MODE.md  Claude Code /goal as a discipline-preserving autonomy muscle
 │   └── UPGRADE-0.7.0.md            moving an existing project to release 0.7.0
 ├── protocols/
 │   ├── NLF.md                      No Lie Fix — real root cause only
