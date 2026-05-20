@@ -104,20 +104,36 @@ echo "Refreshing GNGM-managed subtree (non-destructive to project files)..."
 
 mkdir -p "$TARGET_DOCS/protocols" "$TARGET_DOCS/docs" "$TARGET_DOCS/scripts" "$TARGET_DOCS/clients/graphiti"
 
-# Wipe + recopy each managed subdirectory. Safe because we ONLY touch
-# docs/GNGM/{protocols,docs,scripts,clients}/ — never anything else.
-rm -f "$TARGET_DOCS/protocols"/*.md
-cp "$SOURCE_DIR/protocols"/*.md "$TARGET_DOCS/protocols/"
+# Refresh a managed directory: overwrite the files that exist upstream, but
+# PRESERVE project-only files. A consuming project may add its own custom
+# protocol / doc / script alongside the GNGM-managed ones (winacard, for
+# example, keeps a project-specific protocols/AVQA.md). Blind-wiping the whole
+# directory destroyed those. Only files GNGM actually ships are removed first;
+# everything else in the directory survives.
+PRESERVED=0
+refresh_managed_dir() {
+    local sub="$1" ext="$2"
+    local src="$SOURCE_DIR/$sub" dst="$TARGET_DOCS/$sub"
+    mkdir -p "$dst"
+    local f base
+    for f in "$dst"/*."$ext"; do
+        [ -e "$f" ] || continue
+        base="$(basename "$f")"
+        if [ -f "$src/$base" ]; then
+            rm -f "$f"          # GNGM-managed — recopied fresh below
+        else
+            echo -e "  ${YELLOW}preserved project-only${RESET} $sub/$base"
+            PRESERVED=$((PRESERVED + 1))
+        fi
+    done
+    cp "$src"/*."$ext" "$dst/" 2>/dev/null || true
+}
 
-rm -f "$TARGET_DOCS/docs"/*.md
-cp "$SOURCE_DIR/docs"/*.md "$TARGET_DOCS/docs/" 2>/dev/null || true
-
-rm -f "$TARGET_DOCS/scripts"/*.sh
-cp "$SOURCE_DIR/scripts"/*.sh "$TARGET_DOCS/scripts/"
+refresh_managed_dir protocols       md
+refresh_managed_dir docs            md
+refresh_managed_dir scripts         sh
+refresh_managed_dir clients/graphiti py
 chmod +x "$TARGET_DOCS/scripts"/*.sh
-
-rm -f "$TARGET_DOCS/clients/graphiti"/*.py
-cp "$SOURCE_DIR/clients/graphiti"/*.py "$TARGET_DOCS/clients/graphiti/"
 
 # Version stamp — lets a consuming project check which GNGM release it is on
 cp "$SOURCE_DIR/VERSION" "$TARGET_DOCS/VERSION" 2>/dev/null || true
@@ -199,6 +215,16 @@ fi
 
 echo -e "${GREEN}Update complete.${RESET}"
 echo "GNGM version: $(cat "$TARGET_DOCS/VERSION" 2>/dev/null || echo 'unknown (pre-0.8.0)')"
+echo ""
+if [ "${PRESERVED:-0}" -gt 0 ]; then
+    echo -e "${YELLOW}Preserved $PRESERVED project-only file(s)${RESET} — kept as-is (not GNGM-managed)."
+    echo ""
+fi
+echo -e "${YELLOW}⚠ GNGM-managed files were overwritten from upstream.${RESET}"
+echo "  If you edited a GNGM-managed protocol/doc IN PLACE (e.g. extended the"
+echo "  shipped DEBUG.md with project-specific runbooks), that edit was"
+echo "  replaced. Run 'git diff docs/GNGM/' and restore in-place"
+echo "  customizations BEFORE committing."
 echo ""
 echo "Next steps:"
 echo "  - Review protocol changes:    git -C $TARGET diff --stat docs/GNGM/"

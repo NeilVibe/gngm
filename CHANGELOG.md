@@ -2,6 +2,35 @@
 
 All notable changes to GNGM (the portable knowledge stack protocol).
 
+## [0.8.1] — 2026-05-21 — gngm-update.sh preserves project-only files
+
+A safety fix for the updater. `gngm-update.sh` refreshed each managed
+directory by `rm -f docs/GNGM/<dir>/*` then recopying from upstream — which
+destroyed any **project-only** file a consuming project had added alongside
+the GNGM-managed ones. The "non-destructive to project files" guarantee did
+not hold for project files placed *inside* the GNGM subtree.
+
+### Fixed
+
+- **`scripts/gngm-update.sh`** — new `refresh_managed_dir` helper. Each
+  managed directory (`protocols/`, `docs/`, `scripts/`, `clients/graphiti/`)
+  is now refreshed by removing+recopying **only the files that exist
+  upstream**. Files the project added itself (e.g. a project-specific
+  `protocols/AVQA.md`) are detected and **preserved**, and each preserved
+  file is printed. The post-refresh summary also warns explicitly that
+  GNGM-managed files edited *in place* (e.g. a `DEBUG.md` extended with
+  project runbooks) are still overwritten — an update cannot auto-merge
+  those — and to `git diff docs/GNGM/` before committing.
+
+### Discovered
+
+- Found while updating the `winacard` project to 0.8.0: the blind wipe
+  deleted winacard's project-only `protocols/AVQA.md` and overwrote its
+  in-place-extended `protocols/DEBUG.md` (project debug runbooks + case
+  studies). Both were git-tracked and recovered with `git checkout`, but the
+  data-loss window was real — and a project whose GNGM subtree was not yet
+  committed would have lost the files outright.
+
 ## [0.8.0] — 2026-05-21 — `/goal` autonomous mode + explicit AST refresh at NSH
 
 Adds the `/goal` autonomous-mode guide and makes the Graphify AST refresh an
