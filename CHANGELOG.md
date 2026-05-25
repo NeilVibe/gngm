@@ -2,6 +2,64 @@
 
 All notable changes to GNGM (the portable knowledge stack protocol).
 
+## [0.9.0] — 2026-05-25 — CONTEXT-HYGIENE protocol (prevent 529 Overloaded from per-project bloat)
+
+A new hygiene protocol — sibling to `VRAM-HYGIENE` — codified from a real
+incident where a single project consistently returned `API Error: 529
+Overloaded` while four sibling projects on the same Anthropic account
+worked fine.
+
+### The incident
+
+The `newfin` project had ~2.4 MB of project-local Claude Code surface
+(30 project skills, 23 nested agent directories with 98 .md files, a
+492 KB commands tree, and three framework runtime dirs — `.claude-flow/`,
+`.swarm/`, `.hive-mind/`) accumulated from an abandoned `claude-flow`
+install. Sibling projects had ~750 KB or less. Only `newfin` 529'd.
+`rm -rf` of the framework dumps removed ~6 MB on disk and ~1.9 MB of
+system-prompt surface; the 529s stopped on the next session.
+
+### Added
+
+- **`protocols/CONTEXT-HYGIENE.md`** — full protocol. Covers what loads
+  into the system prompt vs what doesn't (CLAUDE.md fully loaded; skill
+  + agent frontmatter advertised per-line; settings/memory.db/projects
+  do not load), the five concrete failure modes of bloat (529 on the
+  fat project only, cold-start tax on every cache miss, cache thrash in
+  long sessions, debugging blind alley, trust decay in the tooling),
+  rules by scenario, the audit pattern (size + count + reference check
+  before deletion), safe-to-delete vs danger-zone tables, and the
+  GNGM design invariant: **GNGM itself stays out of `.claude/`** — it
+  installs into `docs/GNGM/`. Triggers: `CTX`, `BLOAT`, `CONTEXT-HYGIENE`.
+- **`scripts/gngm-context-audit.sh`** — diagnostic-only audit script
+  (never deletes). Modes: single-project (`./gngm-context-audit.sh
+  ~/project`), all-projects sweep under `$HOME` (`--all`), or
+  worst-N-only (`--top`). Color-codes each metric (CLAUDE.md size,
+  project skills count, project agents nested count, project commands
+  count) against thresholds calibrated against the newfin incident.
+  Exit code 1 if any project crossed a RED threshold. Reveals framework
+  runtime state dirs (`.claude-flow/`, `.swarm/`, `.hive-mind/`,
+  `.ruv-swarm*/`, `.sparc/`) as a yellow signal.
+- **`README.md`** — new trigger-table row (`CTX` / `BLOAT`), new
+  Operational-cluster bullet, new repo-structure entries for the
+  protocol and the script. Also removed a stale "All fourteen" count
+  in favor of a count-free phrasing — the protocol roster has grown
+  faster than the README's hardcoded number.
+
+### Discovered
+
+- The `gngm-context-audit.sh --all` script, run for the first time
+  immediately after creation, surfaced two **additional** projects on
+  the same machine with RED-threshold CLAUDE.md (~36 KB each:
+  `~/CityEmpire`, `~/WebTranslatorNew`) and one with 109 nested agent
+  .md files (`~/LocalizationTools`). None were 529ing yet — but they
+  were sitting on the same edge. The protocol's value showed up in the
+  same session it shipped.
+- The script also flushed out a bash `read -r` gotcha: with
+  `IFS=$'\t'`, consecutive tabs (when a field is empty) get collapsed
+  because tab is treated as IFS-whitespace. Fixed by using a `"-"`
+  placeholder for empty framework-dir lists instead of an empty field.
+
 ## [0.8.1] — 2026-05-21 — gngm-update.sh preserves project-only files
 
 A safety fix for the updater. `gngm-update.sh` refreshed each managed

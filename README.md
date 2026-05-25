@@ -153,6 +153,7 @@ Full setup: [docs/01-SETUP.md](docs/01-SETUP.md)
 | `PRD-TO-ISSUES` | [PRD-TO-ISSUES.md](protocols/PRD-TO-ISSUES.md) | Tracer-bullet vertical-slice decomposition |
 | `UL` / `UBIQUITOUS-LANGUAGE` | [UBIQUITOUS-LANGUAGE.md](protocols/UBIQUITOUS-LANGUAGE.md) | DDD glossary extraction (auto-suggested by NSH) |
 | `IA` / `IMPROVE-ARCHITECTURE` | [IMPROVE-ARCHITECTURE.md](protocols/IMPROVE-ARCHITECTURE.md) | Codebase audit + parallel sub-agent interface designs |
+| `CTX` / `CONTEXT-HYGIENE` / `BLOAT` | [CONTEXT-HYGIENE.md](protocols/CONTEXT-HYGIENE.md) | Audit per-project `.claude/` surface; identify framework bloat tipping a project over the 529 Overloaded cliff |
 
 Git-safety + git-hygiene apply automatically to every git operation; no trigger needed.
 
@@ -175,8 +176,9 @@ GNGM is the knowledge stack. These are the engineering disciplines that use it:
 - **[protocols/LOGGING.md](protocols/LOGGING.md)** — **Logging standards.** Backend + frontend log format, correlation-ID contract (`x-trace-id` round-trip), structured event naming, PII rules, audit-log separation. Trigger: `LOG`.
 - **[protocols/STRESS-TEST.md](protocols/STRESS-TEST.md)** — **Stress-test discipline.** 7 dimensions (concurrency, burst rate, reconnect churn, state exhaustion, memory leak, cascading failure, long-tail latency). Smart small-N pressure with falsifiable invariants + cost guards. Triggers: `STRESS`, `STRESS <feature>`.
 - **[protocols/NATURAL-STOP-HANDOFF.md](protocols/NATURAL-STOP-HANDOFF.md)** — **NSH.** When work hits a clean natural stop (logical-unit complete + tree clean + tests green + clarity high), Claude proactively runs the 7-step session-close: verify → tests → GNGM sweep → push work → write detailed handoff → update active state → commit + push handoff → signal `/clear`-ready. Variants: `NSH dry`, `NSH no push`, `NSH minimal`. Closes the off-machine-gap + discovery-rot + state-drift trio that bites every long session.
+- **[protocols/CONTEXT-HYGIENE.md](protocols/CONTEXT-HYGIENE.md)** — **Context bloat discipline.** Per-project `.claude/` directories silently accumulate framework dumps (claude-flow, SPARC, swarm libraries, abandoned skill installs) that inflate the system prompt and tip requests over Anthropic's 529 Overloaded cliff while sibling projects on the same account work fine. The protocol defines: what loads vs what doesn't, safe-vs-danger-zone deletion, the audit pattern (size + count + reference check), and cadence (immediate on 529, monthly otherwise). Sister hygiene protocol to VRAM-HYGIENE. Triggers: `CTX`, `BLOAT`.
 
-(GIT-SAFETY + GIT-HYGIENE predate the 0.5.0 cluster; RAC + DEBUG + LOGGING + STRESS-TEST + NATURAL-STOP-HANDOFF were the 0.5.0 release group.)
+(GIT-SAFETY + GIT-HYGIENE predate the 0.5.0 cluster; RAC + DEBUG + LOGGING + STRESS-TEST + NATURAL-STOP-HANDOFF were the 0.5.0 release group; CONTEXT-HYGIENE was codified 2026-05-25 after a real 529 incident.)
 
 **Product / scoping cluster (added 0.6.0):**
 
@@ -185,7 +187,7 @@ GNGM is the knowledge stack. These are the engineering disciplines that use it:
 - **[protocols/UBIQUITOUS-LANGUAGE.md](protocols/UBIQUITOUS-LANGUAGE.md)** — **Domain glossary protocol.** Extract a DDD-style glossary from conversation / PRD / codebase. Flags ambiguities (one word for many concepts, many words for one concept) and proposes canonical terms with aliases-to-avoid. Saves to `UBIQUITOUS_LANGUAGE.md`. Auto-suggested by NSH Step 3.5 when glossary is stale. Triggers: `UBIQUITOUS-LANGUAGE`, `UL`.
 - **[protocols/IMPROVE-ARCHITECTURE.md](protocols/IMPROVE-ARCHITECTURE.md)** — **Codebase architectural audit.** Explore organically (friction-as-signal, not rigid heuristics), surface deepening candidates per Ousterhout's deep-module thesis, spawn 3+ parallel sub-agents to design competing interfaces, ship an opinionated refactor RFC. Complements RAC at the L3 (Execution) layer where module shape determines testability + AI-navigability. Triggers: `IMPROVE-ARCHITECTURE`, `IA`.
 
-All fourteen are universal across projects; no project-specific context required.
+All of these are universal across projects; no project-specific context required.
 
 ## Repository structure
 
@@ -222,7 +224,8 @@ gngm/
 │   ├── PRD.md                      Product Requirements Document (front-of-funnel for SDP)
 │   ├── PRD-TO-ISSUES.md            Vertical-slice decomposition (PRD → tracer-bullet issues)
 │   ├── UBIQUITOUS-LANGUAGE.md      DDD glossary protocol (auto-suggested by NSH)
-│   └── IMPROVE-ARCHITECTURE.md     Codebase architectural audit (parallel sub-agent designs)
+│   ├── IMPROVE-ARCHITECTURE.md     Codebase architectural audit (parallel sub-agent designs)
+│   └── CONTEXT-HYGIENE.md          Per-project .claude/ bloat discipline (prevent 529 Overloaded)
 ├── templates/
 │   ├── CLAUDE.md.tpl               project-level instructions template
 │   ├── MEMORY.md.tpl               memory trunk template
@@ -242,6 +245,7 @@ gngm/
     ├── gngm-update.sh              non-destructive docs refresh for installed GNGM
     ├── gngm-upgrade-tools.sh       opt-in tool-version upgrade (graphify + graphiti-core)
     ├── gngm-hygiene-check.sh       validate frontmatter + cross-refs
+    ├── gngm-context-audit.sh       per-project .claude/ surface audit (diagnostic, never deletes)
     └── install-services.sh         one-shot services installer
 ```
 
